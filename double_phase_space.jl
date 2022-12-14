@@ -29,11 +29,12 @@ function ModifiedHamiltonianProblem(fy,fx,initial_condition,tspan,par=nothing)
     ODEProblem( F!, initial_condition, tspan, par)
 end
 
-function calculate_expectation(θ::Number,fy,fx,quadrature_generator,output_func,reduction,par=nothing)
+function solve_equations(θ::Number,par,fy,fx,getNodesAndWeights;
+    output_func=(sol,i,θ,par,node,weight)->(sol,false),reduction=(sols,θ)->sols,alg=BS3(),reltol=1e-1,abstol=1e-2,stop_at_caustic=true)
     #=Returns the solution of the ModifiedHamiltonianProblem 
     for each initial condition in nodes, in the interval (0,θ_max)=#
     
-    nodes,weights = quadrature_generator(θ,par)
+    nodes,weights = getNodesAndWeights(θ,par)
     prob = ModifiedHamiltonianProblem(fy,fx,u0(nodes[1]),(0,θ/2),par)
 
     #Changes the initial condition after each run
@@ -41,22 +42,27 @@ function calculate_expectation(θ::Number,fy,fx,quadrature_generator,output_func
         remake(prob,u0=ComponentArray(prob.u0,x=nodes[i]))
     end
 
-    ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=(sol,i)->output_func(sol,i,(nodes,weights),θ,par))
+    ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=(sol,i)->output_func(sol,i,θ,par,nodes[i],weights[i]))
 
-    #The if statement checks if we want to abort the trajectories that cross caustics.
-    condition(u,t,integrator) = det(u.jac_x)           #This will return true if det(u.jac_x)==0
-    affect!(integrator) = terminate!(integrator)       #We terminate the solution when the condition is true
-    cb = ContinuousCallback(condition,affect!)
+    if stop_at_caustic
+        condition(u,t,integrator) = det(u.jac_x)           #This will return true if det(u.jac_x)==0
+        affect!(integrator) = terminate!(integrator)       #We terminate the solution when the condition is true
+        cb = ContinuousCallback(condition,affect!,save_positions=(true,false))
+    else
+        cb = nothing
+    end
 
-    sols = solve( ensemble_prob,BS3(),trajectories=length(nodes),reltol=1e-1,abstol=1e-2,save_everystep=false,save_start=false,callback=cb )
+    sols = solve(ensemble_prob,alg,trajectories=length(nodes),reltol=reltol,abstol=abstol,callback=cb,save_start=false,save_everystep=false)
 
     reduction(sols,θ)
 end
 
-#=function calculate_expectation(θs::AbstractArray,fy,fx,(nodes,weights),output_func,reduction,par=nothing)
+function solve_equations(θs::AbstractArray,par,fy,fx,getNodesAndWeights;
+    output_func=(sol,i,θ,par,node,weight)->(sol,false),reduction=(sols,θ)->sols,alg=BS3(),reltol=1e-1,abstol=1e-2,stop_at_caustic=true)
     #=Returns the solution of the ModifiedHamiltonianProblem 
     for each initial condition in nodes, in the interval (0,θ_max)=#
     
+    nodes,weights = getNodesAndWeights(par)
     prob = ModifiedHamiltonianProblem(fy,fx,u0(nodes[1]),(0,last(θs)/2),par)
 
     #Changes the initial condition after each run
@@ -64,14 +70,17 @@ end
         remake(prob,u0=ComponentArray(prob.u0,x=nodes[i]))
     end
 
-    ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=(sol,i)->output_func(sol,i,(nodes,weights),θs,par))
+    ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=(sol,i)->output_func(sol,i,θs,par,nodes[i],weights[i]))
 
-    #The if statement checks if we want to abort the trajectories that cross caustics.
-    condition(u,t,integrator) = det(u.jac_x)           #This will return true if det(u.jac_x)==0
-    affect!(integrator) = terminate!(integrator)       #We terminate the solution when the condition is true
-    cb = ContinuousCallback(condition,affect!,save_positions=(true,false))
+    if stop_at_caustic
+        condition(u,t,integrator) = det(u.jac_x)           #This will return true if det(u.jac_x)==0
+        affect!(integrator) = terminate!(integrator)       #We terminate the solution when the condition is true
+        cb = ContinuousCallback(condition,affect!,save_positions=(true,false))
+    else
+        cb = nothing
+    end
 
-    sols = solve( ensemble_prob,BS3(),trajectories=length(nodes),reltol=1e-1,abstol=1e-2,saveat=θs/2,callback=cb )
+    sols = solve(ensemble_prob,alg,trajectories=length(nodes),reltol=reltol,abstol=abstol,callback=cb,saveat=θs/2,save_start=false)
 
     reduction(sols,θs)
-end=#
+end

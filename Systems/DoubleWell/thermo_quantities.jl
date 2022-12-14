@@ -1,8 +1,8 @@
-using FastGaussQuadrature, StaticArrays, ThreadsX, CairoMakie, Integrals,IntegralsCubature
-##
-include("solveSchrodinger.jl")
-include("double_phase_space.jl")
-include("sampling.jl")
+using StaticArrays, CairoMakie
+
+include("../../solveSchrodinger.jl")
+include("../../double_phase_space.jl")
+include("../../sampling.jl")
 
 function EX_U(θ::Number,V,χ)
     xs = LinRange(-10,10,2048)
@@ -15,11 +15,6 @@ function EX_U(θs::AbstractArray,V,χ)
     Es,ψs = solveSchrodinger(xs,V;par=χ)
     map(θ->sum(E->E*exp(-θ*E),Es)/sum(E->exp(-θ*E),Es),θs)
 end
-##
-V(q,χ) = χ*q^4/4+(1/2-χ)*q^2
-H(x,χ) = x[1]^2/2 + V(x[2],χ)
-fy(y,x,χ) = SA[-2x[1],-(χ*(4x[2]^2-3y[1]^2)/2+2(1-2χ))*x[2]]
-fx(y,x,χ) = SA[(χ*(y[1]^2/4-3x[2]^2)-(1-2χ))*y[1]/2,-y[2]/2]
 
 function quadrature_generator(θ,χ,N=10^5)   
     Ps = rand(Normal(0,1/√θ),N)
@@ -32,13 +27,14 @@ function Z_integrand(u,θ,χ,nodes,i)
 end
 
 function energy_output(sol,i,(nodes,weights),θ,par)
-    replace([Z_integrand(sol[end],θ,χ,nodes,i),H(sol[end].x,par)],Inf=>0),false
+    #replace([Z_integrand(sol[end],θ,χ,nodes,i),H(sol[end].x,par)],Inf=>0),false
+    [Z_integrand(sol[end],θ,χ,nodes,i),H(sol[end].x,par)],false
 end
 
 function energy_reduction(sols,θ)
     sum(prod,eachcol(sols))/sum(first,view(sols,1,:))
 end
-##
+
 function CL_energy_integrand!(dX,X,(θ,χ))
     Threads.@threads for n in axes(X,2)
         dX[:,n] = exp(-θ*H(view(X,:,n),χ))*[1,H(view(X,:,n),χ)]
@@ -50,7 +46,7 @@ function CL_U(θ,χ)
     sol = solve(prob,CubatureJLh(),reltol=1e-4,abstol=1e-5)
     sol[2]/sol[1]
 end
-##
+
 θ=1.8
 χ=2
 U_ex = EX_U(θ,V,χ)
@@ -83,5 +79,5 @@ axislegend()
 px = .45
 py = .91
 text!(ax,px*θs_ex[end]+(1-px)θs_ex[1],py*U_ex[1]+(1-py)U_ex[end],text=L"\chi=%$χ",textsize=36)
-ylims!(ax,1.5*U_ex[end],1.1*U_ex[1])
+ylims!(ax,5U_ex[end],1.1*U_ex[1])
 f
