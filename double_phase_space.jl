@@ -80,7 +80,7 @@ function solve_equations(θs::AbstractArray,par,fy,fx,getNodesAndWeights;
         cb = nothing
     end
 
-    sols = solve(ensemble_prob,alg,trajectories=length(nodes),reltol=reltol,abstol=abstol,callback=cb,saveat=θs/2,save_start=false)
+    sols = solve(ensemble_prob,alg,trajectories=length(nodes),reltol=reltol,abstol=abstol,callback=cb,saveat=θs/2)
 
     reduction(sols,θs)
 end
