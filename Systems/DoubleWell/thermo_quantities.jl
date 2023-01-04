@@ -1,8 +1,9 @@
-using StaticArrays, CairoMakie
+using StaticArrays, CairoMakie, Integrals, IntegralsCubature, Distributions
 
 include("../../solveSchrodinger.jl")
 include("../../double_phase_space.jl")
-include("../../sampling.jl")
+include("../../metropolisHastings.jl")
+include("double_well.jl")
 
 function EX_U(θ::Number,V,χ)
     xs = LinRange(-10,10,2048)
@@ -18,7 +19,7 @@ end
 
 function quadrature_generator(θ,χ,N=10^5)   
     Ps = rand(Normal(0,1/√θ),N)
-    Qs = sample(q-> exp(-θ*V(q,χ)),N)
+    Qs = metropolisHastings(q-> exp(-θ*V(q,χ)),N)
     [SA[Ps[n],Qs[n]] for n in 1:N], ones(N)
 end
 
@@ -26,9 +27,8 @@ function Z_integrand(u,θ,χ,nodes,i)
     exp(u.Δ)*√abs(det(u.jac_x))
 end
 
-function energy_output(sol,i,(nodes,weights),θ,par)
-    #replace([Z_integrand(sol[end],θ,χ,nodes,i),H(sol[end].x,par)],Inf=>0),false
-    [Z_integrand(sol[end],θ,χ,nodes,i),H(sol[end].x,par)],false
+function energy_output(sol,i,θ,par,node,weight,)
+    [weight*Z_integrand(sol[end],θ,χ,node,i),H(sol[end].x,par)],false
 end
 
 function energy_reduction(sols,θ)
@@ -46,11 +46,11 @@ function CL_U(θ,χ)
     sol = solve(prob,CubatureJLh(),reltol=1e-4,abstol=1e-5)
     sol[2]/sol[1]
 end
-
-θ=1.8
-χ=2
+##
+θ=.2
+χ=.5
 U_ex = EX_U(θ,V,χ)
-U_sc = calculate_expectation(θ,fy,fx,(θ,χ)->quadrature_generator(θ,χ,10^5),energy_output,energy_reduction,χ)
+U_sc = solve_equations(θ,χ,fy,fx,quadrature_generator,output_func=energy_output,reduction=energy_reduction)
 CL_U(θ,χ)
 ##
 χ = 2
@@ -61,7 +61,7 @@ N = 16
 θs_ex = LinRange(θ_min,θ_max,4N)
 ##
 U_ex = EX_U(θs_ex,V,χ)
-U_sc = map(θ->calculate_expectation(θ,fy,fx,quadrature_generator,energy_output,energy_reduction,χ), θs_sc)
+U_sc = map(θ->solve_equations(θ,χ,fy,fx,quadrature_generator,output_func=energy_output,reduction=energy_reduction), θs_sc)
 U_cl = map(θ-> CL_U(θ,χ),θs_ex)
 ##
 f = Figure(fontsize=24)

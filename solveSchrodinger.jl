@@ -8,6 +8,6 @@ end
 
 function solveSchrodinger(xs,ys,V;xmass=1,ymass=1,nev=50,par=nothing)
     H = sparse( -( D(length(xs))/(2*xmass*(xs[2]-xs[1])^2) ⊕ D(length(ys))/(2*ymass*(ys[2]-ys[1])^2) )
-    + diagm(vec(map(r->V(r...,par), Iterators.product(xs,ys)))) )
+    + diagm(vec(map(r->V([r[1],r[2]],par), Iterators.product(xs,ys)))) )
     eigs(H,nev=nev,which=:SR)
 end

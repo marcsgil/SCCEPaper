@@ -36,23 +36,6 @@ function energy_reduction(sols,θs)
     map(n->f(view(sols,n,:)),eachindex(θs))
 end
 
-#=function heat_output(sol,i,(nodes,weights),θs,par,H,H2)
-    output = fill( ntuple(i->zero(eltype(θs)),3), length(θs) )
-    E = H(nodes[i],par)
-    for (n,u) in enumerate(sol.u)
-        output[n] = (weights[i]*Z_integrand(u,θs[n]*E),H(u.x,par),H2(u.x,par))
-    end
-    output,false
-end
-
-function heat_reduction(sols,θs)
-    function f(collection)
-        inverse_Z = 1/sum( x->x[1],collection)
-        inverse_Z*sum( x->x[1]*x[3],collection)-(inverse_Z*sum( x->x[1]*x[2],collection))^2
-    end
-    map(n->θs[n]^2*f(view(sols,n,:)),eachindex(θs))
-end=#
-
 function CL_energy_integrand!(dX,X,(θ,χ))
     Threads.@threads for n in axes(X,2)
         dX[:,n] = exp(-θ*H(view(X,:,n),χ))*[1,H(view(X,:,n),χ)]
