@@ -44,10 +44,21 @@ function solve_equations(θ::Number,par,fy,fx,getNodesAndWeights;
 
     ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=(sol,i)->output_func(sol,i,θ,par,nodes[i],weights[i]))
 
-    if stop_at_caustic
+    #=if stop_at_caustic
         condition(u,t,integrator) = det(u.jac_x)           #This will return true if det(u.jac_x)==0
         affect!(integrator) = terminate!(integrator)       #We terminate the solution when the condition is true
         cb = ContinuousCallback(condition,affect!,save_positions=(true,false))
+    else
+        cb = nothing
+    end=#
+
+    if stop_at_caustic
+        condition(u,t,integrator) = u.Δ < 1 && det(u.jac_x) != 0 && u.Δ > -10    #This will return true if det(u.jac_x)==0
+        #affect!(integrator) = terminate!(integrator)       #We terminate the solution when the condition is true
+        function affect!(integrator)
+            integrator.u = zero(integrator.u)
+        end
+        cb = ContinuousCallback(condition,affect!,save_positions=(false,false))
     else
         cb = nothing
     end
@@ -73,9 +84,12 @@ function solve_equations(θs::AbstractArray,par,fy,fx,getNodesAndWeights;
     ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=(sol,i)->output_func(sol,i,θs,par,nodes[i],weights[i]))
 
     if stop_at_caustic
-        condition(u,t,integrator) = det(u.jac_x)           #This will return true if det(u.jac_x)==0
-        affect!(integrator) = terminate!(integrator)       #We terminate the solution when the condition is true
-        cb = ContinuousCallback(condition,affect!,save_positions=(true,false))
+        condition(u,t,integrator) = u.Δ < 1 && det(u.jac_x) != 0 && u.Δ > -10    #This will return true if det(u.jac_x)==0
+        #affect!(integrator) = terminate!(integrator)       #We terminate the solution when the condition is true
+        function affect!(integrator)
+            integrator.u = zero(integrator.u)
+        end
+        cb = ContinuousCallback(condition,affect!,save_positions=(false,false))
     else
         cb = nothing
     end

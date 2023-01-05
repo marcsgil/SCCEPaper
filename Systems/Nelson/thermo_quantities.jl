@@ -34,7 +34,7 @@ function CL_U(θ,μ)
     sol[2]/sol[1]
 end
 ##
-θ=.1
+θ=1
 μ= 2
 
 U_sc = solve_equations(θ,μ,fy,fx,quadrature_generator,output_func=energy_output,reduction=energy_reduction)
@@ -44,16 +44,45 @@ nodes,weights = quadrature_generator(θ,μ,10^6)
 
 sum(x->H(x,μ)*exp(-θ*H(x,μ)),nodes)/10^6
 ##
-xs = LinRange(-4.5,4.5,128)
-ys = LinRange(-3,4,128)
-Es,ψs = solveSchrodinger(xs,ys,V;nev=50,par=μ)
+xs = LinRange(-4.5,4.5,150)
+ys = LinRange(-4,5,150)
+Es,ψs = solveSchrodinger(xs,ys,V;nev=60,par=μ)
 
 Es
 ψs
 ##
 
-heatmap(xs,ys,abs2.(reshape(ψs[:,9],length(xs),length(ys))))
+heatmap(xs,ys,abs2.(reshape(ψs[:,60],length(xs),length(ys))))
 ##
 U(θ,Es) = sum(E->E*exp(-θ*E),Es)/sum(E->exp(-θ*E),Es)
-
+last(Es)
 U(θ,Es)
+##
+μ = 2
+θ_min = .2
+θ_max = 1
+N = 16
+θs_sc = LinRange(θ_min,θ_max,N)
+θs_ex = LinRange(θ_min,θ_max,4N)
+##
+U_ex = [U(θ,Es) for θ in θs_ex]
+U_sc = map(θ->solve_equations(θ,χ,fy,fx,quadrature_generator,output_func=energy_output,reduction=energy_reduction), θs_sc)
+##
+CairoMakie.activate!()
+f = CairoMakie.Figure(fontsize=24)
+ax = CairoMakie.Axis(f[1, 1],
+    xlabel = L"θ",
+    xlabelsize=32,
+    ylabel = "Energy",
+    ylabelsize=24
+)
+lines!(ax,θs_ex,U_ex,label="Exact",color=:black)
+scatter!(ax,θs_sc,U_sc,label="SC",color=:red,marker=:diamond)
+#lines!(ax,θs_sc,U_sc,label="SC",color=:red)
+lines!(ax,θs_ex,U_cl,label="Classical",color=:blue)
+axislegend()
+px = .45
+py = .91
+text!(ax,px*θs_ex[end]+(1-px)θs_ex[1],py*U_ex[1]+(1-py)U_ex[end],text=L"\chi=%$χ",textsize=36)
+#ylims!(ax,5U_ex[end],1.1*U_ex[1])
+f

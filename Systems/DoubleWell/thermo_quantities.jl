@@ -47,15 +47,15 @@ function CL_U(θ,χ)
     sol[2]/sol[1]
 end
 ##
-θ=.2
+θ=3
 χ=.5
 U_ex = EX_U(θ,V,χ)
-U_sc = solve_equations(θ,χ,fy,fx,quadrature_generator,output_func=energy_output,reduction=energy_reduction)
+U_sc = solve_equations(θ,χ,fy,fx,(θ,χ)->quadrature_generator(θ,χ,10^6) ,output_func=energy_output,reduction=energy_reduction)
 CL_U(θ,χ)
 ##
-χ = 2
+χ = 1
 θ_min = .2
-θ_max = 2
+θ_max = 3
 N = 16
 θs_sc = LinRange(θ_min,θ_max,N)
 θs_ex = LinRange(θ_min,θ_max,4N)
@@ -64,7 +64,8 @@ U_ex = EX_U(θs_ex,V,χ)
 U_sc = map(θ->solve_equations(θ,χ,fy,fx,quadrature_generator,output_func=energy_output,reduction=energy_reduction), θs_sc)
 U_cl = map(θ-> CL_U(θ,χ),θs_ex)
 ##
-f = Figure(fontsize=24)
+CairoMakie.activate!()
+f = CairoMakie.Figure(fontsize=24)
 ax = CairoMakie.Axis(f[1, 1],
     xlabel = L"θ",
     xlabelsize=32,
@@ -79,5 +80,5 @@ axislegend()
 px = .45
 py = .91
 text!(ax,px*θs_ex[end]+(1-px)θs_ex[1],py*U_ex[1]+(1-py)U_ex[end],text=L"\chi=%$χ",textsize=36)
-ylims!(ax,5U_ex[end],1.1*U_ex[1])
+#ylims!(ax,5U_ex[end],1.1*U_ex[1])
 f
