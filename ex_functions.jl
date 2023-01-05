@@ -11,3 +11,5 @@ function solveSchrodinger(xs,ys,V;xmass=1,ymass=1,nev=50,par=nothing)
     + diagm(vec(map(r->V([r[1],r[2]],par), Iterators.product(xs,ys)))) )
     eigs(H,nev=nev,which=:SR)
 end
+
+ex_U(θ,Es) = sum(E->E*exp(-θ*E),Es)/sum(E->exp(-θ*E),Es)

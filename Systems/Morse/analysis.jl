@@ -3,7 +3,7 @@ using StaticArrays,GLMakie
 include("../../double_phase_space.jl")
 include("morse.jl")
 
-function analysis_output(sol,i,θs,par,node,weight)
+function analysis_output(sol,i,θs,par,nodes,weight)
     output = Array{eltype(θs)}(undef,2,length(θs))
     E = H(node,par)
     for (n,u) in enumerate(sol.u)

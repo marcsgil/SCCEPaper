@@ -23,9 +23,8 @@ xs = [SA[p,q] for p in ps, q in qs]
 θs = LinRange(0,3,128)
 χ=2
 ##
-stop_at_caustic=true
 sols = solve_equations(θs,χ,fy,fx,(par)->(xs,ones(N^2)),
-abstol=1e-12,reltol=1e-12,alg=Vern8(),output_func=analysis_output,stop_at_caustic=stop_at_caustic)
+abstol=1e-12,reltol=1e-12,alg=Vern8(),output_func=analysis_output)
 sol = solve_equations(θs,χ,fy,fx,(par)->([SA[5,0]],ones(N^2)),
 abstol=1e-12,reltol=1e-12,alg=Vern8(),output_func=analysis_output,stop_at_caustic=stop_at_caustic)
 ##
@@ -35,7 +34,7 @@ ax2 = GLMakie.Axis(fig[1,3],xlabel="q",ylabel="p",title="Determinante Jacobiano"
 
 sl = Slider(fig[2, :], range = eachindex(θs), startvalue = 1)
 
-title = Label(fig[0, :], L"\theta = %$(round(θs[1],digits=2)),\chi=%$χ", textsize = 30)
+title = Label(fig[0, :], L"\theta = %$(round(θs[1],digits=2)),\chi=%$χ", fontsize = 30)
 lift(sl.value) do n
     title.text = L"\theta = %$(round(θs[n],digits=2)),\chi=%$χ"
 end
