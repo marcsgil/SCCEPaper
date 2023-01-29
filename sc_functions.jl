@@ -17,11 +17,16 @@ function J(d)
 end
 
 function get_equations_of_motion(H,d)
-    @variables x₁::Real x₂::Real y₁::Real y₂::Real par::Real
-    x = [x₁,x₂]
-    y = [y₁,y₂]
+    Meta.parse( "@variables " * prod("x$n::Real " for n in 1:2d) * prod("y$n::Real " for n in 1:2d)*"par::Real" ) |> eval
+
+    exp_x = Meta.parse("[" * prod(["x$n, " for n in 1:2d]) * "]")
+    exp_y = Meta.parse("[" * prod(["y$n, " for n in 1:2d]) * "]")
+
+    x = eval(exp_x)
+    y = eval(exp_y)
+
     ℍ = H(x+im*J(d)*y/2,par) + H(x-im*J(d)*y/2,par) |> real
-    build_function( Symbolics.gradient(-ℍ, [x₁,x₂]), y,x,par)[1] |> eval, build_function( Symbolics.gradient(ℍ, [y₁,y₂]), y,x,par)[1] |> eval
+    build_function( Symbolics.gradient(-ℍ, eval(exp_x)), y,x,par)[1] |> eval, build_function( Symbolics.gradient(ℍ, eval(exp_y)), y,x,par)[1] |> eval
 end
 
 function Z_integrandMonteCarlo(u,θ,par,nodes,i)
@@ -46,7 +51,7 @@ function energyMonteCarlo(θ,par,H,d,fy,fx,N;alg=BS3(),reltol=1e-1,abstol=1e-2,c
     output_func=energy_outputMonteCarlo,reduction=energy_reduction,alg=alg,reltol=reltol,abstol=abstol,callback=callback)
 end
 
-function analysis_output(sol,i,θs,par,nodes,weights)
+function analysis_output(sol,i,θs,par,nodes,weights,H)
     output = Array{eltype(θs)}(undef,3,length(θs))
     E = H(nodes[i],par)
     for (n,u) in enumerate(sol.u)
