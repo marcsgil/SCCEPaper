@@ -1,6 +1,3 @@
-using DifferentialEquations,ComponentArrays,SparseDiffTools,LinearAlgebra
-using Parameters: @unpack
-
 function u0(X)
     #Given the initial center X, builds the initial conditions for the initial value problem.
     temp = X*transpose(X)
@@ -9,7 +6,7 @@ end
 
 function ModifiedHamiltonianProblem(fy,fx,initial_condition,tspan,par=nothing)
     function F!(du,u,par,t)
-        @unpack x,y,Δ,jac_y,jac_x = u
+        Parameters.@unpack x,y,Δ,jac_y,jac_x = u
     
         #Differential equation for y and x
         du.y = fy(y,x,par)
@@ -42,7 +39,8 @@ strong_callback = CallbackSet(caustic_callback,area_callback)
 
 
 function solve_equations(θ,par,fy,fx,getNodesAndWeights,H;
-    output_func=(sol,i,θ,par,node,weight)->(sol,false),reduction=(sols,θ)->sols,alg=BS3(),reltol=1e-1,abstol=1e-2,callback=strong_callback)
+    output_func=(sol,i,θ,par,node,weight,H)->(sol,false),reduction=(sols,θ)->sols,alg=BS3(),
+    reltol=1e-1,abstol=1e-2,callback=strong_callback)
     #=Returns the solution of the ModifiedHamiltonianProblem 
     for each initial condition in nodes, in the interval (0,θ_max)=#
 

@@ -1,7 +1,3 @@
-using Symbolics,StaticArrays
-
-include("metropolisHastings.jl")
-
 function J(d)
     J = zeros(Int,2d,2d)
     for j in axes(J,2)
@@ -29,6 +25,21 @@ function get_equations_of_motion(H,d)
     build_function( Symbolics.gradient(-ℍ, eval(exp_x)), y,x,par)[1] |> eval, build_function( Symbolics.gradient(ℍ, eval(exp_y)), y,x,par)[1] |> eval
 end
 
+function Z_integrand(u,energy_term)
+    exp( u.Δ - energy_term )*√abs(det(u.jac_x))
+end
+
+function energy_output(sol,i,θs,par,nodes,weights,H)
+    output = Array{eltype(θs)}(undef,2,length(θs))
+
+    E = H(nodes[i],par)
+    for (n,u) in enumerate(sol.u)
+        output[1,n] = weights[i]*Z_integrand(u,θs[n]*E)
+        output[2,n] = H(u.x,par)
+    end
+    output,false
+end
+
 function Z_integrandMonteCarlo(u,θ,par,nodes,i)
     exp(u.Δ)*√abs(det(u.jac_x))
 end
@@ -38,7 +49,13 @@ function energy_outputMonteCarlo(sol,i,θ,par,nodes,weights,H)
 end
 
 function energy_reduction(sols,θ)
-    sum(prod,eachcol(sols))/sum(first,view(sols,1,:))
+    if ndims(sols) == 2
+        sum(prod,eachcol(sols))/sum(first,view(sols,1,:))
+    elseif ndims(sols) == 3
+        [ energy_reduction(sol,θ) for sol in eachslice(sols,dims=2)  ]
+    else
+        @error "Unsuported number of dimensions."
+    end
 end
 
 function sample_points(θ,par,N,H,d)

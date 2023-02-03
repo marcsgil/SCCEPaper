@@ -7,7 +7,7 @@ V(q,χ) = χ*q^4/4+(1/2-χ)*q^2
 H(x,χ) = x[1]^2/2 + V(x[2],χ)
 fy,fx = get_equations_of_motion(H,1)
 ##
-χ = 1.
+χ = .5
 xs = LinRange(-10,10,2048)
 Es,ψs = solveSchrodinger(xs,V;par=χ)
 
@@ -16,7 +16,7 @@ ex_U(θ,Es)
 
 
 
-energyMonteCarlo(θ,χ,H,1,fy,fx,10^5)
+energyMonteCarlo(2.,χ,H,1,fy,fx,10^5)
 ##
 N = 64
 ps = LinRange(-12,12,N)
@@ -24,10 +24,10 @@ qs = LinRange(-6,6,N)
 xs = [SA[p,q] for p in ps, q in qs]
 
 θs = LinRange(0,3,64)
-χ=2
+χ=.5
 
 sols = solve_equations(θs,χ,fy,fx,(par)->(xs,ones(N^2)),H,
-abstol=1e-12,reltol=1e-12,alg=Vern8(),output_func=analysis_output,callback=custom_callback)
+abstol=1e-12,reltol=1e-12,alg=Vern8(),output_func=analysis_output,callback=strong_callback)
 ##
 using GLMakie
 GLMakie.activate!()
