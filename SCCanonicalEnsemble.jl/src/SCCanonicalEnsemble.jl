@@ -7,17 +7,19 @@ using ComponentArrays,SparseDiffTools,LinearAlgebra
 using Parameters
 
 include("sc_solution.jl")
-export caustic_callback,strong_callback,solve_equations
-
-include("sc_solution2.jl")
-export get_equations_of_motion2,solve_equations2
+export caustic_callback,strong_callback,disc_caustic_callback,
+solve_equations,extract_jac_x,phase_space_dim,extract_det_jac,annul!
 
 include("metropolisHastings.jl")
 
-using Symbolics,StaticArrays
 include("sc_functions.jl")
-export get_equations_of_motion,Z_integrandMonteCarlo,
-energy_outputMonteCarlo,Z_integrand,
-energy_output,energy_reduction,energyMonteCarlo,analysis_output,analysis_outputMC
+export energy_output,energy_outputMonteCarlo,energy_reduction,analysis_output,
+caustic_callback,energyMonteCarlo
+
+using Symbolics
+include("symbolic_eqs_of_motion.jl")
+export get_equations_of_motion
+
+
 
 end

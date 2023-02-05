@@ -2,5 +2,6 @@
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 FastGaussQuadrature = "442a2c76-b920-505d-bb47-c5924d526838"
 GLMakie = "e9467ef8-e4e7-5192-8a1a-b1aee30e663a"
+ProgressMeter = "92933f4c-e287-5a05-a399-4b506db050ca"
 SCCanonicalEnsemble = "3bfa7071-2b33-4273-97d0-e7e68b878870"
-StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+SolveSchrodinger = "34afbbb9-bf65-4e06-b884-915c9a1cdfc9"

@@ -1,57 +1,72 @@
 function u0(X)
     #Given the initial center X, builds the initial conditions for the initial value problem.
-    temp = X*transpose(X)
-    ComponentArray( y=zero(X),x=X,Δ=zero(eltype(X)),jac_y= zero(temp),jac_x=one(temp))
+    T = eltype(X)
+    N = length(X)
+    vcat(zero(X),X,vec(vcat(zeros(eltype(X),N,N),I(N))),zero(T))
 end
 
-function ModifiedHamiltonianProblem(fy,fx,initial_condition,tspan,par=nothing)
-    function F!(du,u,par,t)
-        Parameters.@unpack x,y,Δ,jac_y,jac_x = u
-    
-        #Differential equation for y and x
-        du.y = fy(y,x,par)
-        du.x = fx(y,x,par)
-
-        #Differential equation for the area Δ
-        du.Δ = y⋅du.x
-    
-        #Differential equation for the jacobians
-        for n in axes(jac_y,2)
-            du.jac_y[:,n] = @views auto_jacvec(y->fy(y,x,par), y, jac_y[:,n]) + auto_jacvec(x->fy(y,x,par), x, jac_x[:,n])
-            du.jac_x[:,n] = @views auto_jacvec(y->fx(y,x,par), y, jac_y[:,n]) + auto_jacvec(x->fx(y,x,par), x, jac_x[:,n])
-        end
-        
-    end
-    
-    ODEProblem( F!, initial_condition, tspan, par)
+function extract_jac_x(u)
+    N = Int((-1+√(2length(u)-1))/2)
+    view(reshape((@view u[2N+1:end-1]),2N,N),N+1:2N,:)
 end
 
-function affect!(integrator)
+function extract_det_jac(u)
+    N = Int((-1+√(2length(u)-1))/2)
+    view(reshape((@view u[2N+1:end-1]),2N,N),N+1:2N,:) |> det
+end
+
+function annul!(integrator)
     integrator.u = zero(integrator.u)
-    terminate!(integrator)
 end
 
-area_condition(u,t,integrator) = u.Δ > 0 && integrator.uprev.Δ < 0
-caustic_cross_contidion(u,t,integrator) = det(u.jac_x)
-caustic_callback = ContinuousCallback(caustic_cross_contidion,affect!,save_positions=(false,false))
-area_callback = DiscreteCallback(area_condition,affect!,save_positions=(false,false))
-strong_callback = CallbackSet(caustic_callback,area_callback)
+area_condition(u,t,integrator) = u[end] > 0 && integrator.uprev[end] < 0
+caustic_cross_contidion(u,t,integrator) = extract_det_jac(u)
+caustic_callback = ContinuousCallback(caustic_cross_contidion,annul!,save_positions=(false,false))
+disc_caustic_cross_contidion(u,t,integrator) = extract_det_jac(u) < 0 && extract_det_jac(integrator.uprev) > 0
+disc_caustic_callback = DiscreteCallback(disc_caustic_cross_contidion,annul!,save_positions=(false,false))
+area_callback = DiscreteCallback(area_condition,annul!,save_positions=(false,false))
+strong_callback = CallbackSet(disc_caustic_callback,area_callback)
 
+function phase_space_dim(u)
+    Int((-1+√(2length(u)-1))/2)
+end
 
-function solve_equations(θ,par,fy,fx,getNodesAndWeights,H;
+function solve_equations(θ,par,f!,getNodesAndWeights,H;
     output_func=(sol,i,θ,par,node,weight,H)->(sol,false),reduction=(sols,θ)->sols,alg=BS3(),
-    reltol=1e-1,abstol=1e-2,callback=strong_callback)
+    reltol=1e-1,abstol=1e-2,callback=caustic_callback)
     #=Returns the solution of the ModifiedHamiltonianProblem 
     for each initial condition in nodes, in the interval (0,θ_max)=#
 
     θ = float.(θ)
     
     nodes,weights = applicable(getNodesAndWeights,par) ? getNodesAndWeights(par) : getNodesAndWeights(θ,par)
-    prob = ModifiedHamiltonianProblem(fy,fx,u0(nodes[1]),(0,last(θ)/2),par)
+
+    initial_condition = u0(nodes[1])
+    N = phase_space_dim(initial_condition)
+    J = JacVec((du,u) -> f!(du,u,par),view(initial_condition,1:2N))
+
+    function F!(du,u,par,J,N)
+        #Differential equation for y and x
+        f!(view(du,1:2N),view(u,1:2N),par)
+    
+        #Differential equation for the jacobians
+        J.x .= view(u,1:2N)
+    
+        for j in 1:N
+            mul!(view(du, 2j*N+1:2*(j+1)*N ),J,view(u,2j*N+1:2*(j+1)*N ))
+        end
+    
+        #Differential equation for the area Δ
+        du[end] = view(u,1:N) ⋅ view(du,N+1:2N)
+    
+        nothing
+    end
+
+    prob = ODEProblem((du,u,par,t)->F!(du,u,par,J,N),initial_condition,(0,last(θ)/2),par)
 
     #Changes the initial condition after each run
     function prob_func(prob,i,repeat)
-        remake(prob,u0=ComponentArray(prob.u0,x=nodes[i]))
+        remake(prob,u0=u0(nodes[i]))
     end
 
     ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=(sol,i)->output_func(sol,i,θ,par,nodes,weights,H))
