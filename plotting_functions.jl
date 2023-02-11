@@ -1,6 +1,23 @@
-using CairoMakie,GLMakie
+using CairoMakie,MakiePublication
 
-function comparison_plot(θs_ex,θs_sc,Us_ex,Us_sc,title="")
+set_theme!(theme_aps())
+
+function comparison_plot(θs_lines,θs_scatter,Us_ex,Us_sc;title="")
+    CairoMakie.activate!()
+    f = CairoMakie.Figure(fontsize=24)
+    ax = CairoMakie.Axis(f[1, 1],
+        xlabel = L"θ",
+        ylabel = "Energy",
+        title = title
+    )
+    ylims!(ax,last(Us_ex)*2^sign(-last(Us_ex)),first(Us_ex)*1.05,)
+    lines!(ax,θs_lines,Us_ex,label="Exact",color=:black)
+    scatter!(ax,θs_scatter,Us_sc,label="SC",color=:red)
+    axislegend()
+    f
+end
+
+function comparison_plot(θs_lines,θs_scatter,Us_ex,Us_sc,Us_c;title="")
     CairoMakie.activate!()
     f = CairoMakie.Figure(fontsize=24)
     ax = CairoMakie.Axis(f[1, 1],
@@ -12,12 +29,14 @@ function comparison_plot(θs_ex,θs_sc,Us_ex,Us_sc,title="")
         titlesize = 32
     )
     ylims!(ax,last(Us_ex)*2^sign(-last(Us_ex)),first(Us_ex)*1.05,)
-    lines!(ax,θs_ex,Us_ex,label="Exact",color=:black)
-    scatter!(ax,θs_sc,Us_sc,label="SC",color=:red,marker=:diamond)
+    lines!(ax,θs_lines,Us_ex,label="Exact")
+    scatter!(ax,θs_scatter,Us_sc,label="Semi-classical")
+    lines!(ax,θs_lines,Us_ex,label="Classical")
     axislegend()
     f
 end
 
+#=using GLMakie
 function analysis_plot(sols,ps,qs,θs,χ)
     GLMakie.activate!()
 
@@ -44,15 +63,4 @@ function analysis_plot(sols,ps,qs,θs,χ)
     Colorbar(fig[1, 4], hm2)
 
     fig
-end
-
-#=
-
-##
-using GLMakie
-GLMakie.activate!()
-##
-
-##
-
-=#
+end=#

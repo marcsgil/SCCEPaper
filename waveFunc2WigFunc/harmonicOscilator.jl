@@ -1,19 +1,15 @@
 using CairoMakie
+
+using WaveToWigner
+using SolveSchrodinger
 ##
-include("fft_utils.jl")
-include("solve1DSchrodinger.jl")
-include("waveFunc2WigFunc.jl")
-##
-V(q) = q^2
+V(q,par) = q^2/2
 qs = LinRange(-5,5,2048)
-Es,ψs = solve(V,qs,1/2,1/2)
-lines(qs,ψs[:, 21])
-lines(qs,abs2.(ψs[:, 22]))
-Es[1]
+Es,ψs = solveSchrodinger(qs,V)
 ##
-ps_grid = DFTGrid(2048,5,1)
-ps = direct_grid(ps_grid)
-##
+ps = copy(qs)
+W = waveToWinger(view(ψs,:,3),ps,qs)
+heatmap(qs,ps,W,colormap = cgrad([:red,:white,:blue]),colorrange =(-maximum(W),maximum(W)))
 Ws = calculate_many_wigners(ψs,qs,ps_grid,7)
 ##
 round2(x) = round(x,digits=2)

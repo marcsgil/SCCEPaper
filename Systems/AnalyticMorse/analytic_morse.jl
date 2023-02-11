@@ -39,12 +39,3 @@ fs = [f(-im*t,x₀,χ) |> real for t in ts]
 
 lines(ts,fs)
 ##
-θc(ϵ) = log(1/√ϵ+√(1/ϵ-1))/√(1-ϵ)
-
-ϵs = LinRange(0,1,1024)
-fig = Figure(fontsize=20)
-ax = Axis(fig[1,1],xlabel=L"\epsilon",xlabelsize=30,ylabel=L"\omega \theta_c",ylabelsize=30)
-lines!(ax,ϵs,θc.(ϵs),linewidth=3)
-xlims!(ax,0,1)
-ylims!(ax,1,3)
-fig
