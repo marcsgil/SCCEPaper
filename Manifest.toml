@@ -2,7 +2,7 @@
 
 julia_version = "1.8.5"
 manifest_format = "2.0"
-project_hash = "967cde306956ec9321d375a8be490b3de44bb4e6"
+project_hash = "1a55551fb7468719763fcf73f6e05314fe902b8f"
 
 [[deps.AbstractAlgebra]]
 deps = ["GroupsCore", "InteractiveUtils", "LinearAlgebra", "MacroTools", "Markdown", "Random", "RandomExtensions", "SparseArrays", "Test"]
@@ -1734,7 +1734,7 @@ uuid = "7e49a35a-f44a-4d26-94aa-eba1b4ca6b47"
 version = "0.5.5"
 
 [[deps.SCCanonicalEnsemble]]
-deps = ["DifferentialEquations", "FiniteDiff", "ForwardDiff", "Integrals", "LinearAlgebra", "Polynomials", "Preferences", "Reexport", "SparseDiffTools", "StaticArrays", "Symbolics", "Zygote"]
+deps = ["DifferentialEquations", "ForwardDiff", "LinearAlgebra", "Polynomials", "Reexport", "SparseDiffTools", "StaticArrays", "Symbolics"]
 path = "SCCanonicalEnsemble.jl"
 uuid = "3bfa7071-2b33-4273-97d0-e7e68b878870"
 version = "0.1.0"
