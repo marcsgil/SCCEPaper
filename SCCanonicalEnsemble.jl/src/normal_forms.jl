@@ -112,7 +112,7 @@ function energy_NF(θs::AbstractArray,H_operator::Polynomial,J_max=200.)
     expectation_value_NF( θs,F,F,J_max)
 end
 
-function heat_capacity_NF(θs::AbstractArray,H_operator::Polynomial,J_max=200.)
+function heat_NF(θs::AbstractArray,H_operator::Polynomial,J_max=200.)
     F = wigner_symbol_of_normal_form(H_operator)
     F2 = wigner_symbol_of_normal_form(H_operator^2)
     Us = expectation_value_NF( θs,F,F,J_max)

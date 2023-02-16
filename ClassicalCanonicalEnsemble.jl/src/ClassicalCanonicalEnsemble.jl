@@ -1,6 +1,6 @@
 module ClassicalCanonicalEnsemble
 
-export classical_partion_function,classical_energy
+export classical_partion_function,classical_energy,classical_heat
 
 using Integrals,IntegralsCubature,ForwardDiff,ThreadsX
 
@@ -50,5 +50,28 @@ function classical_energy(θ,H,d::Integer,par=nothing; indicator_function = (x,p
     sol[2]/sol[1]
 end
 
+function classical_heat(θ,H,d::Integer,par=nothing; indicator_function = (x,par) -> true)
+
+    function integrand(x,par)
+        X = transform.(x)
+        if indicator_function(X,par)
+            exp(-θ*H(X,par))*prod(g,x)
+        else
+            zero(eltype(x))
+        end
+    end
+
+    function integrand!(y,u,par)
+        Threads.@threads for i in axes(u,2)
+            y[1,i] = integrand(view(u,:,i),par)
+            y[2,i] = y[1,i]*H(transform.(view(u,:,i)),par)
+            y[3,i] = y[2,i]*H(transform.(view(u,:,i)),par)
+        end
+    end
+
+    prob = IntegralProblem(integrand!,fill(-1,2d),fill(1,2d),par,batch=2,nout=3)
+    sol = solve(prob,CubatureJLh()).u
+    θ^2 * ( sol[3]/sol[1] - ( sol[2]/sol[1] )^2 )    
+end
 
 end

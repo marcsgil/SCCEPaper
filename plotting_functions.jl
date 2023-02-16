@@ -22,16 +22,13 @@ function comparison_plot(θs_lines,θs_scatter,Us_ex,Us_sc,Us_c;title="")
     f = CairoMakie.Figure(fontsize=24)
     ax = CairoMakie.Axis(f[1, 1],
         xlabel = L"θ",
-        xlabelsize=32,
         ylabel = "Energy",
-        ylabelsize=24,
         title = title,
-        titlesize = 32
     )
     ylims!(ax,last(Us_ex)*2^sign(-last(Us_ex)),first(Us_ex)*1.05,)
     lines!(ax,θs_lines,Us_ex,label="Exact")
-    scatter!(ax,θs_scatter,Us_sc,label="Semi-classical")
-    lines!(ax,θs_lines,Us_ex,label="Classical")
+    lines!(ax,θs_scatter,Us_sc,label="Semi-classical")
+    lines!(ax,θs_lines,Us_c,label="Classical")
     axislegend()
     f
 end

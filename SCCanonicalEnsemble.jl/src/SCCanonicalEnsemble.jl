@@ -22,7 +22,7 @@ export get_equations_of_motion
 using StaticArrays
 @reexport using Polynomials
 include("normal_forms.jl")
-export energy_NF,heat_capacity_NF
+export energy_NF,heat_NF
 
 
 end
