@@ -1,43 +1,19 @@
 using SCCanonicalEnsemble
 using ClassicalCanonicalEnsemble
+using ExactCanonicalEnsemble
 ##
+H(x,χ) = sum(abs2,x)/2+χ*(sum(abs2,x)/2)^2
 Es(χ) = [ (n+1/2) + χ*(n+1/2)^2 for n in 0:10^5 ]
 
-function U_ex(θ::Number,Es::AbstractArray)
-    sum(E->E*exp(-θ*E),Es)/sum(E->exp(-θ*E),Es)
-end
-
-function U_ex(θs::AbstractArray,χ::Number)
-    es = Es(χ)
-    map(θ->U_ex(θ,es),θs)
-end
-
-function C_ex(θ::Number,Es::AbstractArray)
-    Z = sum(E->exp(-θ*E),Es)
-    U = sum(E->E*exp(-θ*E),Es)/Z
-    U2 = sum(E->E^2*exp(-θ*E),Es)/Z
-    θ^2*( U2 - U^2 )
-end
-
-function C_ex(θs::AbstractArray,χ::Number)
-    es = Es(χ)
-    map(θ->C_ex(θ,es),θs)
-end
-
-
-U_sc(θs::AbstractArray,χ) = energy_NF(θs,Polynomial([0,1,χ]),2000.)
-C_sc(θs::AbstractArray,χ) = heat_NF(θs,Polynomial([0,1,χ]),2000.)
-
-function U_sc(θs::AbstractArray,χs::AbstractArray)
-    reduce(hcat,map(χ->U(θs,χ),χs))
-end
+sc_energy(θs::AbstractArray,χ) = energy_NF(θs,Polynomial([0,1,χ]),2000.)
+sc_heat(θs::AbstractArray,χ) = heat_NF(θs,Polynomial([0,1,χ]),2000.)
 ##
 θs = LinRange(.2,10,128)
 χ = .5
-Us_ex =  U_ex(θs,χ)
-Us_sc = U_sc(θs,χ)
-H(x,χ) = sum(abs2,x)/2+χ*(sum(abs2,x)/2)^2
-Us_c = classical_energy.(θs,H,1,χ)
+Us_ex =  exact_energy(θs,χ,Es)
+Us_sc = sc_energy(θs,χ)
+
+Us_c = classical_energy(θs,H,1,χ)
 ##
 C_ex(θs,χ)
 Us_sc = C_sc(θs,χ)
@@ -68,9 +44,9 @@ end
 ps = []
 
 for χ ∈ [.1,.3,.6,1]
-    Us_ex = U_ex(θs,χ)
-    Us_sc = U_sc(θs,χ)
-    Us_c = classical_energy.(θs,H,1,χ)
+    Us_ex = exact_energy(θs,χ,Es)
+    Us_sc = sc_energy(θs,χ)
+    Us_c = classical_energy(θs,H,1,χ)
     push!(ps,make_plot(θs,Us_ex,Us_sc,Us_c,χ,length(ps)==3))
 end
 
@@ -102,11 +78,11 @@ end
 ps = []
 
 for χ ∈ [.1,.3,.6,1]
-    Cs_ex = C_ex(θs,χ)
-    Cs_sc = C_sc(θs,χ)
-    Cs_c = classical_heat.(θs,H,1,χ)
+    Cs_ex = exact_heat(θs,χ,Es)
+    Cs_sc = sc_heat(θs,χ)
+    Cs_c = classical_heat(θs,H,1,χ)
     push!(ps,make_plot(θs,Cs_ex,Cs_sc,Cs_c,χ,length(ps)==3))
 end
 
 plot(ps[1],ps[2],ps[3],ps[4],size=(354,700),layout=(4,1),left_margin=3Plots.mm,ylims=(-.2,.99))
-png("Plots/Kerr/heats_kerr")
+#png("Plots/Kerr/heats_kerr")

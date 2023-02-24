@@ -71,7 +71,7 @@ function solve_equations(θ,par,f!,getNodesAndWeights,H;
 
     ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=(sol,i)->output_func(sol,i,θ,par,nodes,weights,H))
 
-    if typeof(θ) <: AbstractArray
+    if θ isa AbstractArray
         sols = solve(ensemble_prob,alg,trajectories=length(nodes),reltol=reltol,abstol=abstol,
         callback=callback,saveat=θ/2)
     else

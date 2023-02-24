@@ -23,11 +23,43 @@ function energy_outputMonteCarlo(sol,i,θ,par,nodes,weights,H)
     [Z_integrandMonteCarlo(sol.u[end],θ,par,nodes[i],i),H(view(sol.u[end],N+1:2N),par)],false
 end
 
+function heat_outputMonteCarlo(sol,i,θ,par,nodes,weights,H,H2)
+    N=phase_space_dim(sol.u[end])
+    [Z_integrandMonteCarlo(sol.u[end],θ,par,nodes[i],i),
+    H(view(sol.u[end],N+1:2N),par),
+    H2(view(sol.u[end],N+1:2N),par)],false
+end
+
 function energy_reduction(sols,θ)
     if ndims(sols) == 2
         sum(prod,eachcol(sols))/sum(first,view(sols,1,:))
     elseif ndims(sols) == 3
         [ energy_reduction(sol,θ) for sol in eachslice(sols,dims=2)  ]
+    else
+        @error "Unsuported number of dimensions."
+        sols
+    end
+end
+
+function heat_output(sol,i,θs,par,nodes,weights,H,H2)
+    N=phase_space_dim(sol[end])
+    output = Array{eltype(θs)}(undef,3,length(θs))
+
+    E = H(nodes[i],par)
+    for (n,u) in enumerate(sol.u)
+        output[1,n] = weights[i]*Z_integrand(u,θs[n]*E)
+        output[2,n] = H(view(u,N+1:2N),par)
+        output[3,n] = H2(view(u,N+1:2N),par)
+    end
+    output,false
+end
+
+function heat_reduction(sols,θ)
+    if ndims(sols) == 2
+        inv_Z = 1/sum(first,view(sols,1,:))
+        θ^2*( inv_Z*sum(prod,eachcol(view(sols,[1,3],:))) - (inv_Z*sum(prod,eachcol(view(sols,[1,2],:))))^2)
+    elseif ndims(sols) == 3
+        [ heat_reduction(sol,θ[n]) for (n,sol) in enumerate(eachslice(sols,dims=2))  ]
     else
         @error "Unsuported number of dimensions."
         sols
@@ -42,6 +74,11 @@ end
 function energyMonteCarlo(θ,par,H,d,f,N;alg=BS3(),reltol=1e-1,abstol=1e-2,callback=strong_callback)
     solve_equations(θ,par,f,(θ,par)->sample_points(θ,par,N,H,d),H,
     output_func=energy_outputMonteCarlo,reduction=energy_reduction,alg=alg,reltol=reltol,abstol=abstol,callback=callback)
+end
+
+function heatMonteCarlo(θ,par,H,d,f,N;alg=BS3(),reltol=1e-1,abstol=1e-2,callback=strong_callback)
+    solve_equations(θ,par,f,(θ,par)->sample_points(θ,par,N,H,d),H,
+    output_func=heat_outputMonteCarlo,reduction=heat_reduction,alg=alg,reltol=reltol,abstol=abstol,callback=callback)
 end
 
 function analysis_output(sol,i,θs,par,nodes,weights,H)

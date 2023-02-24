@@ -28,5 +28,4 @@ function get_equations_of_motion(H,d,par_symbol=nothing)
     ℍ = H(x+im*J(d)*y/2,par) + H(x-im*J(d)*y/2,par) |> real
 
     build_function(vcat(Symbolics.gradient(-ℍ, x),Symbolics.gradient( ℍ, y),), u,par)[2] |> eval
-    #vcat(Symbolics.gradient(-ℍ, x),Symbolics.gradient( ℍ, y))
 end
