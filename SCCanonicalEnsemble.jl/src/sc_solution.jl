@@ -69,7 +69,12 @@ function solve_equations(θ,par,f!,getNodesAndWeights,H;
         remake(prob,u0=u0(nodes[i]))
     end
 
-    ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=(sol,i)->output_func(sol,i,θ,par,nodes,weights,H))
+    H2 = squared_hamiltonian_symbol(H,N ÷ 2)
+
+    formated_ouput_func(sol,i) = applicable(output_func,sol,1,first(θ),par,nodes,weights,H) ? 
+    output_func(sol,i,θ,par,nodes,weights,H) : output_func(sol,i,θ,par,nodes,weights,H,H2)    
+
+    ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=formated_ouput_func)
 
     if θ isa AbstractArray
         sols = solve(ensemble_prob,alg,trajectories=length(nodes),reltol=reltol,abstol=abstol,

@@ -29,3 +29,18 @@ function get_equations_of_motion(H,d,par_symbol=nothing)
 
     build_function(vcat(Symbolics.gradient(-ℍ, x),Symbolics.gradient( ℍ, y),), u,par)[2] |> eval
 end
+
+function squared_hamiltonian_symbol(H,d)
+    Meta.parse( "@variables " * prod("x$n::Real " for n in 1:2d) * "par::Real t::Real" ) |> eval
+
+    x = Meta.parse("[" * prod(["x$n, " for n in 1:2d]) * "]") |> eval
+    p = view(x,1:d)
+    q = view(x,d+1:2d)
+
+    ham = H(x,par)
+    grad_p = Symbolics.gradient(ham, p)
+    grad_q = Symbolics.gradient(ham, q)
+    lap = sum(n -> Symbolics.derivative(grad_p[n],p[n])*Symbolics.derivative(grad_q[n],q[n]), 1:d)
+
+    build_function(ham^2 - lap/4, x,par,expression=Val{false}) |> eval
+end

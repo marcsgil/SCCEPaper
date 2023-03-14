@@ -45,7 +45,7 @@ Us_sc = solve_equations(scatter_θs,χ,f!,getNodesAndWeights,H,output_func=energ
 Us_c = classical_energy.(line_θs,χ)
 #jldsave("Results/Morse/energy_χ=$χ.jld2";scatter_θs,line_θs,χ,Us_ex,Us_sc,Us_c)
 ##
-χ = .01
+χ = .12
 θ_min = .01
 θ_max = 5
 N = 32
@@ -54,26 +54,34 @@ line_θs = LinRange(θ_min,θ_max,4N)
 
 Cs_ex = exact_heat(line_θs,χ,Es)
 Cs_sc = solve_equations(scatter_θs,χ,f!,χ-> getNodesAndWeights(χ,400),H,
-output_func=(sol,i,θs,par,nodes,weights,H)->heat_output(sol,i,θs,par,nodes,weights,H,H2),reduction=heat_reduction,callback=disc_caustic_callback)
+output_func=heat_output,reduction=heat_reduction,callback=disc_caustic_callback)
 Cs_c = classical_heat.(line_θs,χ)
-jldsave("Results/Morse/heat_χ=$χ.jld2";scatter_θs,line_θs,χ,Cs_ex,Cs_sc,Cs_c)
+##
+p = plot(line_θs,Cs_ex,
+        ylabel=L"c/k",
+        annotations = ((.9,.6), Plots.text(L"\chi=%$χ",10)),
+        )   
+
+    scatter!(scatter_θs,Cs_sc,label=false,markershape=:diamond)
+    plot!(line_θs,Cs_c,label=false,line=:dot)
+#jldsave("Results/Morse/heat_χ=$χ.jld2";scatter_θs,line_θs,χ,Cs_ex,Cs_sc,Cs_c)
 ##
 using Plots,LaTeXStrings
 
 default(label=false,width=3,size=(354,250), markersize = 3, msw=0, 
 palette=:Set1_3, tickfontsize=8,
-guidefontsize=8, fontfamily="Computer Modern",dpi=1000)
+guidefontsize=8, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
 
 function make_plot(line_θs,scatter_θs,exact,sc,classical,χ,show_tick_legend)
     p = plot(line_θs,exact,
-        ylabel=L"U/\hbar \omega",
+        ylabel=L"E/\hbar \omega",
         annotations = ((.9,.9), Plots.text(L"\chi=%$χ",10)),
         ylims=(0.01,min(first(exact)*1.05,2.4)))
     
     if show_tick_legend
         plot!(p,xlabel=L"\omega \theta",bottom_margin=-3Plots.mm)
     else
-        plot!(p,xformatter=_->"",bottom_margin=-7.5Plots.mm)
+        plot!(p,xformatter=_->"",bottom_margin=-7.8Plots.mm)
     end    
 
     scatter!(scatter_θs,sc,label=false,markershape=:diamond)
@@ -95,7 +103,7 @@ using Plots,LaTeXStrings
 
 default(label=false,width=3,size=(354,250), markersize = 3, msw=0, 
 palette=:Set1_3, tickfontsize=8,
-guidefontsize=8, fontfamily="Computer Modern",dpi=1000)
+guidefontsize=8, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
 
 function make_plot(line_θs,scatter_θs,exact,sc,classical,χ,show_tick_legend)
     p = plot(line_θs,exact,
@@ -106,7 +114,7 @@ function make_plot(line_θs,scatter_θs,exact,sc,classical,χ,show_tick_legend)
     if show_tick_legend
         plot!(p,xlabel=L"\omega \theta",bottom_margin=-3Plots.mm)
     else
-        plot!(p,xformatter=_->"",bottom_margin=-7.5Plots.mm)
+        plot!(p,xformatter=_->"",bottom_margin=-7.7Plots.mm)
     end    
 
     scatter!(scatter_θs,sc,label=false,markershape=:diamond)

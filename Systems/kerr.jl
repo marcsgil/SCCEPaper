@@ -13,27 +13,24 @@ sc_heat(θs::AbstractArray,χ) = heat_NF(θs,Polynomial([0,1,χ]),2000.)
 Us_ex =  exact_energy(θs,χ,Es)
 Us_sc = sc_energy(θs,χ)
 
-Us_c = classical_energy(θs,H,1,χ)
-##
-C_ex(θs,χ)
-Us_sc = C_sc(θs,χ)
-Cs_c = classical_heat.(θs,H,1,χ)
+Us_c = classical_energy(θs,1,χ,hamiltonian=H)
 ##
 using Plots,LaTeXStrings
 
-default(label=false,width=3,size=(354,250), markersize = 5, msw=0, 
+default()
+default(label=false,width=3,size=(354,250), markersize = 4, msw=0, 
 palette=:Set1_3, tickfontsize=8,
-guidefontsize=8, fontfamily="Computer Modern",dpi=1000)
+guidefontsize=8, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
 
 function make_plot(θs,exact,sc,classical,χ,show_tick_legend)
     p = plot(θs,exact,
-        ylabel=L"U/\hbar \omega_0",
+        ylabel=L" E /\hbar \omega_0",
         annotations = ((.9,.9), Plots.text(L"\chi=%$χ",10)))
     
     if show_tick_legend
         plot!(p,xlabel=L"\omega_0 \theta",bottom_margin=-3Plots.mm)
     else
-        plot!(p,xformatter=_->"",bottom_margin=-7.5Plots.mm)
+        plot!(p,xformatter=_->"",bottom_margin=-7.7Plots.mm)
     end    
 
     plot!(θs,sc,label=false,line=:dash)
@@ -42,11 +39,11 @@ end
 
 θs = LinRange(.5,10,128)
 ps = []
-
+ 
 for χ ∈ [.1,.3,.6,1]
     Us_ex = exact_energy(θs,χ,Es)
     Us_sc = sc_energy(θs,χ)
-    Us_c = classical_energy(θs,H,1,χ)
+    Us_c = classical_energy(θs,1,χ,hamiltonian=H)
     push!(ps,make_plot(θs,Us_ex,Us_sc,Us_c,χ,length(ps)==3))
 end
 
@@ -55,9 +52,10 @@ plot(ps[1],ps[2],ps[3],ps[4],size=(354,700),layout=(4,1),left_margin=3Plots.mm)
 ##
 using Plots,LaTeXStrings
 
-default(label=false,width=3,size=(354,250), markersize = 5, msw=0, 
+default()
+default(label=false,width=3,size=(354,250), markersize = 4, msw=0, 
 palette=:Set1_3, tickfontsize=8,
-guidefontsize=8, fontfamily="Computer Modern",dpi=1000)
+guidefontsize=8, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
 
 function make_plot(θs,exact,sc,classical,χ,show_tick_legend)
     p = plot(θs,exact,
@@ -80,7 +78,7 @@ ps = []
 for χ ∈ [.1,.3,.6,1]
     Cs_ex = exact_heat(θs,χ,Es)
     Cs_sc = sc_heat(θs,χ)
-    Cs_c = classical_heat(θs,H,1,χ)
+    Cs_c = classical_heat(θs,1,χ,hamiltonian=H)
     push!(ps,make_plot(θs,Cs_ex,Cs_sc,Cs_c,χ,length(ps)==3))
 end
 

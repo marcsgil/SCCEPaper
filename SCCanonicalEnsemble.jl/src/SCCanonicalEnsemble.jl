@@ -15,7 +15,7 @@ caustic_callback,energyMonteCarlo,heat_reduction,heat_output,heatMonteCarlo
 
 using Symbolics
 include("symbolic_eqs_of_motion.jl")
-export get_equations_of_motion
+export get_equations_of_motion,squared_hamiltonian_symbol
 
 using StaticArrays
 @reexport using Polynomials
