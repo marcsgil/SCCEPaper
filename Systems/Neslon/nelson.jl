@@ -8,10 +8,18 @@ V(q,μ) = (q[1]^2/2-q[2])^2 + μ*q[1]^2
 H(x,μ) = (x[1]^2+x[2]^2)/2 + (x[3]^2/2-x[4])^2 + μ*x[3]^2
 f! = get_equations_of_motion(H,2)
 
+#=
+Some NaN shows up, which appears to be linked with the fact that we are using discrete callbacks.
+Continuous callbacks seem to resolve this problem, but are much slower.
+We then simply thorw the NaNs out.
+=#
 function online_eval_energy(θ,par,tol,max_rep,N)
     s = Series(Mean(), Variance())
     for n in 1:max_rep
-        OnlineStats.fit!(s,energyMonteCarlo(θ,par,H,2,f!,N,callback=disc_caustic_callback))
+        result = energyMonteCarlo(θ,par,H,2,f!,N,callback=disc_caustic_callback)
+        if !isnan(result)
+            OnlineStats.fit!(s,result)
+        end
         val,σ2 = value.(s.stats)
         if √σ2/val < tol && n>1
             break
@@ -25,7 +33,10 @@ end
 function online_eval_heat(θ,par,tol,max_rep,N)
     s = Series(Mean(), Variance())
     for n in 1:max_rep
-        OnlineStats.fit!(s,heatMonteCarlo(θ,par,H,2,f!,N,callback=disc_caustic_callback))
+        result = heatMonteCarlo(θ,par,H,2,f!,N,callback=disc_caustic_callback)
+        if !isnan(result)
+            OnlineStats.fit!(s,result)
+        end
         val,σ2 = value.(s.stats)
         if √σ2/val < tol && n>1
             break
@@ -38,22 +49,24 @@ end
 ##
 
 ##
-μ = .5
-θ_min = .1
-θ_max = 4
-N = 16
-scatter_θs = LinRange(θ_min,θ_max,N)
-line_θs = LinRange(θ_min,θ_max,4N)
+μ = 2
+for μ ∈ (1,2)
+    θ_min = .1
+    θ_max = 4
+    N = 16
+    scatter_θs = LinRange(θ_min,θ_max,N)
+    line_θs = LinRange(θ_min,θ_max,4N)
 
-xs = LinRange(-4.5,4.5,160)
-ys = LinRange(-4,5,160)
-Es,ψs = solveSchrodinger(xs,ys,V;nev=70,par=μ)
-Us_ex = [exact_energy(θ,Es) for θ in line_θs]
+    xs = LinRange(-4.5,4.5,160)
+    ys = LinRange(-4,5,160)
+    Es,ψs = solveSchrodinger(xs,ys,V;nev=70,par=μ)
+    Us_ex = [exact_energy(θ,Es) for θ in line_θs]
 
-Us_sc = @showprogress [online_eval_energy(θ,μ,.02,10,3*10^5) for θ in scatter_θs]
-Us_c = classical_energy(line_θs,2,μ,potential=V,reltol=1e-3)
+    Us_sc = @showprogress [online_eval_energy(θ,μ,0,60,4*10^5) for θ in scatter_θs]
+    Us_c = classical_energy(line_θs,2,μ,potential=V,reltol=1e-3)
 
-#jldsave("Results/Nelson/energy_μ=$μ.jld2";scatter_θs,line_θs,μ,Us_ex,Us_sc,Us_c)
+    jldsave("Results/Nelson/energy_μ=$μ.jld2";scatter_θs,line_θs,μ,Us_ex,Us_sc,Us_c)
+end
 ##
 using Plots,LaTeXStrings
 
@@ -69,7 +82,7 @@ p = plot(line_θs,Us_ex,
         plot!(scatter_θs,first.(Us_sc),label=false,markershape=:diamond,ribbon=last.(Us_sc),linewidth=2)
 plot!(line_θs,Us_c,label=false,line=:dot)
 ##
-μ = 2
+μ = .5
 θ_min = .05
 θ_max = 2
 N = 16
@@ -81,9 +94,7 @@ ys = LinRange(-4,5,160)
 Es,ψs = solveSchrodinger(xs,ys,V;nev=70,par=μ)
 Cs_ex = [exact_heat(θ,Es) for θ in line_θs]
 
-online_eval_heat(2,μ,1e-2,10,10^5)
-
-Cs_sc = @showprogress [online_eval_heat(θ,μ,.01,60,4*10^5) for θ in scatter_θs]
+Cs_sc = @showprogress [online_eval_heat(θ,μ,0,60,4*10^5) for θ in scatter_θs]
 Cs_c = ThreadsX.map(θ -> classical_heat(θ,2,μ,potential=V,integration_limit=350*exp(-2θ),alg=CubatureJLp(),reltol=1e-9,abstol=1e-8),line_θs)
 ##
 using Plots,LaTeXStrings
