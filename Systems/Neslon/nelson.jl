@@ -118,25 +118,21 @@ jldsave("Results/Nelson/heat_μ=$μ.jld2";scatter_θs,line_θs,μ,Cs_ex,Cs_sc,Cs
 using Plots,LaTeXStrings
 
 default()
-default(label=false,width=3,size=(354,250), markersize = 4, msw=0, 
-palette=:Set1_3, tickfontsize=8,
-guidefontsize=8, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
+default(label=false,width=4,size=(354,250), markersize = 5, msw=0, 
+palette=:Set1_3, tickfontsize=14,
+guidefontsize=16, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
 
 function make_plot(line_θs,scatter_θs,exact,sc,classical,μ,show_tick_legend)
     p = plot(line_θs,exact,
         ylabel=L"\log_2 E",
-        annotations = ((.9,.9), Plots.text(L"\mu=%$μ",10)),
+        annotations = ((.8,.85), Plots.text(L"\mu=%$μ",14)),
         yaxis=:log,ylims=(0.9*last(classical),1.1*first(classical)),
-        yticks=(2 .^ (-1:.8:4 ),-1:.8:4))
+        yticks=(2 .^ (-1.:4 ),-1.:4))
     
-    if show_tick_legend
-        plot!(p,xlabel=L"\theta",bottom_margin=-50Plots.mm)
-    else
-        plot!(p,xformatter=_->"",bottom_margin=-7.3Plots.mm)
-    end    
+    plot!(p,xlabel=L"\theta") 
 
     plot!(scatter_θs,first.(sc),label=false,
-    markershape=:diamond,ribbon=last.(sc),linewidth=0)
+    markershape=:diamond,linewidth=0)
     plot!(line_θs,classical,label=false,line=:dot)
 end
 
@@ -148,30 +144,26 @@ for μ ∈ (.5,1,2)
     _load("Us_ex"),_load("Us_sc"),_load("Us_c"),μ,length(ps)==2))
 end
 
-plot(ps[1],ps[2],ps[3],size=(354,600),layout=(4,1),left_margin=3.5Plots.mm)
+plot(ps[1],ps[2],ps[3],size=(800,500),layout=(2,2),left_margin = 4Plots.mm)
 #png("Plots/Nelson/energies_nelson")
 ##
 using Plots,LaTeXStrings
 
 default()
-default(label=false,width=3,size=(354,250), markersize = 4, msw=0, 
-palette=:Set1_3, tickfontsize=8,
-guidefontsize=8, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
+default(label=false,width=4,size=(354,250), markersize = 5, msw=0, 
+palette=:Set1_3, tickfontsize=14,
+guidefontsize=16, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
 
 function make_plot(line_θs,scatter_θs,exact,sc,classical,μ,show_tick_legend)
     p = plot(line_θs,exact,
         ylabel=L"c/k",
-        annotations = ((.9,.75), Plots.text(L"\mu=%$μ",10)),
+        annotations = ((.5,.3), Plots.text(L"\mu=%$μ",14)),
         )
     
-    if show_tick_legend
-        plot!(p,xlabel=L"\theta",bottom_margin=-50Plots.mm)
-    else
-        plot!(p,xformatter=_->"",bottom_margin=-7.3Plots.mm)
-    end    
+        plot!(p,xlabel=L"\theta")   
 
     plot!(scatter_θs,first.(sc),label=false,
-    markershape=:diamond,ribbon=last.(sc),linewidth=0)
+    markershape=:diamond,linewidth=0)
     plot!(line_θs,classical,label=false,line=:dot)
 end
 
@@ -183,5 +175,5 @@ for μ ∈ (.5,1,2)
     _load("Cs_ex"),_load("Cs_sc"),_load("Cs_c"),μ,length(ps)==2))
 end
 
-plot(ps[1],ps[2],ps[3],size=(354,600),layout=(4,1),left_margin=3.5Plots.mm)
+plot(ps[1],ps[2],ps[3],size=(800,500),layout=(2,2),left_margin = 4Plots.mm)
 #png("Plots/Nelson/heats_nelson")
