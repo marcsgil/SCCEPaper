@@ -68,23 +68,20 @@ p = plot(line_θs,Cs_ex,
 ##
 using Plots,LaTeXStrings
 
-default(label=false,width=3,size=(354,250), markersize = 3, msw=0, 
-palette=:Set1_3, tickfontsize=8,
-guidefontsize=8, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
+default()
+default(label=false,width=4,size=(354,250), markersize = 5, msw=0, 
+palette=:Set1_3, tickfontsize=12,
+guidefontsize=14, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
 
 function make_plot(line_θs,scatter_θs,exact,sc,classical,χ,show_tick_legend)
     p = plot(line_θs,exact,
         ylabel=L"E/\hbar \omega",
-        annotations = ((.9,.9), Plots.text(L"\chi=%$χ",10)),
+        annotations = ((.8,.85), Plots.text(L"\chi=%$χ",14)),
         ylims=(0.01,min(first(exact)*1.05,2.4)))
     
-    if show_tick_legend
-        plot!(p,xlabel=L"\omega \theta",bottom_margin=-3Plots.mm)
-    else
-        plot!(p,xformatter=_->"",bottom_margin=-7.8Plots.mm)
-    end    
+    plot!(p,xlabel=L"\omega_0 \theta")
 
-    scatter!(scatter_θs,sc,label=false,markershape=:diamond)
+    scatter!(scatter_θs[1:2:end],sc[1:2:end],label=false,markershape=:diamond)
     plot!(line_θs,classical,label=false,line=:dot)
 end
 
@@ -96,28 +93,25 @@ for χ ∈ [.01,.04,.08,.12]
     _load("Us_ex"),_load("Us_sc"),_load("Us_c"),χ,length(ps)==3))
 end
 
-plot(ps[1],ps[2],ps[3],ps[4],size=(354,700),layout=(4,1),left_margin=3.5Plots.mm)
+plot(ps[1],ps[2],ps[3],ps[4],size=(354*2,480),layout=(2,2),left_margin=3Plots.mm,)
 #png("Plots/Morse/morse_energies")
 ##
 using Plots,LaTeXStrings
 
-default(label=false,width=3,size=(354,250), markersize = 3, msw=0, 
-palette=:Set1_3, tickfontsize=8,
-guidefontsize=8, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
+default()
+default(label=false,width=4,size=(354,250), markersize = 5, msw=0, 
+palette=:Set1_3, tickfontsize=12,
+guidefontsize=14, fontfamily="Computer Modern",dpi=1000,grid=false,framestyle = :box)
 
 function make_plot(line_θs,scatter_θs,exact,sc,classical,χ,show_tick_legend)
     p = plot(line_θs,exact,
         ylabel=L"c/k",
-        annotations = ((.9,.6), Plots.text(L"\chi=%$χ",10)),
+        annotations = ((.45,.2), Plots.text(L"\chi=%$χ",14)),
         )
     
-    if show_tick_legend
-        plot!(p,xlabel=L"\omega \theta",bottom_margin=-3Plots.mm)
-    else
-        plot!(p,xformatter=_->"",bottom_margin=-7.7Plots.mm)
-    end    
+        plot!(p,xlabel=L"\omega_0 \theta")   
 
-    scatter!(scatter_θs,sc,label=false,markershape=:diamond)
+    scatter!(scatter_θs[1:2:end],sc[1:2:end],label=false,markershape=:diamond)
     plot!(line_θs,classical,label=false,line=:dot)
 end
 
@@ -129,5 +123,5 @@ for χ ∈ [.01,.04,.08,.12]
     _load("Cs_ex"),_load("Cs_sc"),_load("Cs_c"),χ,length(ps)==3))
 end
 
-plot(ps[1],ps[2],ps[3],ps[4],size=(354,700),layout=(4,1),left_margin=3Plots.mm)
+plot(ps[1],ps[2],ps[3],ps[4],size=(354*2,480),layout=(2,2),left_margin=3Plots.mm)
 #png("Plots/Morse/morse_heats")
