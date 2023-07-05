@@ -57,13 +57,13 @@ Cs_sc = solve_equations(scatter_θs,χ,f!,χ-> getNodesAndWeights(χ,400),H,
 output_func=heat_output,reduction=heat_reduction,callback=disc_caustic_callback)
 Cs_c = classical_heat.(line_θs,χ)
 ##
-p = plot(line_θs,Cs_ex,
+p = plot(line_θs,Us_ex,
         ylabel=L"c/k",
         annotations = ((.9,.6), Plots.text(L"\chi=%$χ",10)),
         )   
 
-    scatter!(scatter_θs,Cs_sc,label=false,markershape=:diamond)
-    plot!(line_θs,Cs_c,label=false,line=:dot)
+    scatter!(scatter_θs,Us_sc,label=false,markershape=:diamond)
+    plot!(line_θs,Us_c,label=false,line=:dot)
 #jldsave("Results/Morse/heat_χ=$χ.jld2";scatter_θs,line_θs,χ,Cs_ex,Cs_sc,Cs_c)
 ##
 using Plots,LaTeXStrings

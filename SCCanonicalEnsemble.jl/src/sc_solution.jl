@@ -50,7 +50,7 @@ function solve_equations(θ,par,f!,getNodesAndWeights,H;
         f!(view(du,1:2N),view(u,1:2N),par)
     
         #Differential equation for the jacobians
-        J.x .= view(u,1:2N)
+        J.op.u .= view(u,1:2N)
     
         for j in 1:N
             mul!(view(du, 2j*N+1:2*(j+1)*N ),J,view(u,2j*N+1:2*(j+1)*N ))
