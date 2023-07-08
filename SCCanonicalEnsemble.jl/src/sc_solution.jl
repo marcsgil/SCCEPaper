@@ -5,15 +5,16 @@ function u0(X)
     vcat(zero(X),X,vec(vcat(zeros(eltype(X),N,N),I(N))),zero(T))
 end
 
+function phase_space_dim(u)
+    Int((-1+√(2length(u)-1))/2)
+end
+
 function extract_jac_x(u)
-    N = Int((-1+√(2length(u)-1))/2)
+    N = phase_space_dim(u)
     view(reshape((@view u[2N+1:end-1]),2N,N),N+1:2N,:)
 end
 
-function extract_det_jac(u)
-    N = Int((-1+√(2length(u)-1))/2)
-    view(reshape((@view u[2N+1:end-1]),2N,N),N+1:2N,:) |> det
-end
+extract_det_jac(u) = extract_jac_x(u) |> det
 
 function annul!(integrator)
     integrator.u = zero(integrator.u)
@@ -27,8 +28,21 @@ disc_caustic_callback = DiscreteCallback(disc_caustic_cross_contidion,annul!,sav
 area_callback = DiscreteCallback(area_condition,annul!,save_positions=(false,false))
 strong_callback = CallbackSet(disc_caustic_callback,area_callback)
 
-function phase_space_dim(u)
-    Int((-1+√(2length(u)-1))/2)
+function F!(du,u,par,f!,J,N)
+    #Differential equation for y and x
+    f!(view(du,1:2N),view(u,1:2N),par)
+
+    #Differential equation for the jacobians
+    J.op.u .= view(u,1:2N)
+
+    for j in 1:N
+        mul!(view(du, 2j*N+1:2*(j+1)*N ),J,view(u,2j*N+1:2*(j+1)*N ))
+    end
+
+    #Differential equation for the area Δ
+    du[end] = view(u,1:N) ⋅ view(du,N+1:2N)
+
+    nothing
 end
 
 function solve_equations(θ,par,f!,getNodesAndWeights,H;
@@ -42,27 +56,12 @@ function solve_equations(θ,par,f!,getNodesAndWeights,H;
     nodes,weights = applicable(getNodesAndWeights,par) ? getNodesAndWeights(par) : getNodesAndWeights(θ,par)
 
     initial_condition = u0(nodes[1])
+
     N = phase_space_dim(initial_condition)
+
     J = JacVec((du,u) -> f!(du,u,par),view(initial_condition,1:2N))
 
-    function F!(du,u,par,J,N)
-        #Differential equation for y and x
-        f!(view(du,1:2N),view(u,1:2N),par)
-    
-        #Differential equation for the jacobians
-        J.op.u .= view(u,1:2N)
-    
-        for j in 1:N
-            mul!(view(du, 2j*N+1:2*(j+1)*N ),J,view(u,2j*N+1:2*(j+1)*N ))
-        end
-    
-        #Differential equation for the area Δ
-        du[end] = view(u,1:N) ⋅ view(du,N+1:2N)
-    
-        nothing
-    end
-
-    prob = ODEProblem((du,u,par,t)->F!(du,u,par,J,N),initial_condition,(0,last(θ)/2),par)
+    prob = ODEProblem((du,u,par,t)->F!(du,u,par,f!,J,N),initial_condition,(0,last(θ)/2),par)
 
     #Changes the initial condition after each run
     function prob_func(prob,i,repeat)
@@ -71,10 +70,10 @@ function solve_equations(θ,par,f!,getNodesAndWeights,H;
 
     H2 = squared_hamiltonian_symbol(H,N ÷ 2)
 
-    formated_ouput_func(sol,i) = applicable(output_func,sol,1,first(θ),par,nodes,weights,H) ? 
+    formated_output_func(sol,i) = applicable(output_func,sol,1,first(θ),par,nodes,weights,H) ? 
     output_func(sol,i,θ,par,nodes,weights,H) : output_func(sol,i,θ,par,nodes,weights,H,H2)    
 
-    ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=formated_ouput_func)
+    ensemble_prob = EnsembleProblem(prob,prob_func=prob_func,output_func=formated_output_func)
 
     if θ isa AbstractArray
         sols = solve(ensemble_prob,alg,trajectories=length(nodes),reltol=reltol,abstol=abstol,

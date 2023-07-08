@@ -2,7 +2,7 @@ using SCCanonicalEnsemble
 using SolveSchrodinger
 using ProgressMeter
 
-include("../plotting_functions.jl")
+#include("../plotting_functions.jl")
 ##
 V(q,χ) = χ*q^4/4+(1/2-χ)*q^2
 H(x,χ) = x[1]^2/2 + V(x[2],χ)
@@ -16,15 +16,16 @@ f! = get_equations_of_motion(H,1,"χ")
     nothing
 end=#
 ##
-χ = .5
+χ = 1.
 xs = LinRange(-10,10,2048)
 Es,ψs = solveSchrodinger(xs,V;par=χ)
 ex_U(θ,Es) = sum(E->E*exp(-θ*E),Es)/sum(E->exp(-θ*E),Es)
 
-θ = .5
+θ = 3.
 ex_U(θ,Es)
 
-energyMonteCarlo(θ,χ,H,1,f!,10^6,callback=strong_callback)
+energyCubature(θ,χ,f!,H,2)
+energyMonteCarlo(θ,χ,H,1,f!,10^5,callback=strong_callback)
 ##
 N = 128
 ps = LinRange(-12,12,N)

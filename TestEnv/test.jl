@@ -2,20 +2,20 @@ using AdvancedMH,Distributions,LinearAlgebra,MCMCChains,StatsPlots
 
 # Use a struct instead of `typeof(density)` for sake of readability.
 
-density(x) = -(x[1]^2/2 + x[2]^4 - x[2]^2)
+density(x) = -(x^4 - x^2)
 
 m1 = DensityModel(density)
-p1 = MetropolisHastings(RandomWalkProposal(MvNormal(zeros(2),I)))
-c1 = sample(m1, p1, 10^5; param_names = [:p,:q], chain_type=Chains)
+p1 = MetropolisHastings(RandomWalkProposal(Normal()))
+c1 = sample(m1, p1, MCMCThreads(), 1024 , 16; chain_type=Chains)
 
 propertynames(c1)
 propertynames(c1.value)
 c1.value.data
 size(c1)
 
-histogram(c1.value.data[:,1,1],normalize=true)
+histogram(c1.value.data[:,1,4],normalize=true,nbins=100)
 ##
-@benchmark sample(m1, p1, 10^5; param_names = [:p,:q], chain_type=Chains)
+@benchmark sample(m1, p1, MCMCThreads(), 625 , 16; chain_type=Chains)
 
 function metropolisHastings(f,N)
   samples = Vector{Float64}(undef,N)
@@ -57,6 +57,6 @@ end
 
 
 pdf = exp ∘ density
-c2 = metropolisHastings(pdf,10^5,2)
+c2 = metropolisHastings(pdf,10^4)
 histogram(c2,normalize=true)
-@benchmark metropolisHastings($pdf,10^5,2)
+@benchmark metropolisHastings($pdf,10^4)
