@@ -9,7 +9,7 @@ H(x,μ) = (x[1]^2+x[2]^2)/2 + (x[3]^2/2-x[4])^2 + μ*x[3]^2
 f! = get_equations_of_motion(H,2)
 
 μ = 2.
-θ = .5
+θ = 6.
 
 xs = LinRange(-4.5,4.5,160)
 ys = LinRange(-4,5,160)
@@ -17,7 +17,7 @@ Es,ψs = solveSchrodinger(xs,ys,V;nev=70,par=μ)
 Us_ex = exact_energy(θ,Es)
 
 energyCubature(θ,μ,f!,H,4)
-@benchmark energyCubature(θ,μ,f!,H,4)
+@btime energyCubature(θ,μ,f!,H,4)
 
 Us_sc = energyMonteCarlo(θ,μ,H,2,f!,10^5,callback=disc_caustic_callback)
 @benchmark energyMonteCarlo(θ,μ,H,2,f!,10^5,callback=disc_caustic_callback)

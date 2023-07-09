@@ -1,7 +1,0 @@
-[deps]
-DifferentialEquations = "0c46a032-eb83-5123-abaf-570d42b7fbaa"
-Integrals = "de52edbc-65ea-441a-8357-d3a637375a31"
-IntegralsCuba = "e00cd5f1-6337-4131-8b37-28b2fe4cd6cb"
-IntegralsCubature = "c31f79ba-6e32-46d4-a52f-182a8ac42a54"
-SolveSchrodinger = "34afbbb9-bf65-4e06-b884-915c9a1cdfc9"
-SparseDiffTools = "47a9eef4-7e08-11e9-0b38-333d64bd3804"
