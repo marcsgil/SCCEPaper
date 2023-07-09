@@ -2,7 +2,7 @@
 
 julia_version = "1.9.2"
 manifest_format = "2.0"
-project_hash = "aee382e22a020ed8c8762e97707aa39d6730caed"
+project_hash = "b62e9edd11667fbe111c3e552819ce5259be2b75"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "e58c18d2312749847a74f5be80bb0fa53da102bd"
@@ -708,13 +708,6 @@ uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
 deps = ["Artifacts", "Libdl"]
 uuid = "c8ffd9c3-330d-5841-b78e-0817d7145fa1"
 version = "2.28.2+0"
-
-[[deps.MetropolisHastings]]
-git-tree-sha1 = "8c3a2b3c2b768d9e5fdcf300ceecad03790e1eb8"
-repo-rev = "master"
-repo-url = "https://github.com/marcsgil/MetropolisHastings.jl.git"
-uuid = "a9fce899-2dbb-4e00-a423-a666bdad8e5d"
-version = "0.1.0"
 
 [[deps.Missings]]
 deps = ["DataAPI"]
