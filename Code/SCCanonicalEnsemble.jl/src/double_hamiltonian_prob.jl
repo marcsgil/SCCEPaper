@@ -51,7 +51,7 @@ function integrand(Xs, θ, par, f!, H, output_func; dif_eq_alg=nothing, kwargs..
 
     J = JacVec((du, u) -> f!(du, u, par), view(u₀, 1:2N))
 
-    prob = ODEProblem((du, u, par, t) -> F!(du, u, par, f!, J, N), u₀, (0, θ / 2), par)
+    prob = ODEProblem((du, u, par, t) -> F!(du, u, par, f!, J, N), u₀, (0, last(θ) / 2), par)
 
     prob_func(prob, i, repeat) = remake(prob, u0=u0(view(Xs, :, i)))
 

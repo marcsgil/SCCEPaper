@@ -1,5 +1,4 @@
 using SCCanonicalEnsemble
-using ExactCanonicalEnsemble
 using FastGaussQuadrature
 using SpecialFunctions
 using ForwardDiff: derivative
@@ -20,7 +19,7 @@ function getNodesAndWeights(χ,N=300)
     Ps,wPs = gausslegendre(N)
     Qs,wQs = gausschebyshev(N,3)
 
-    [[√(1-Q^2)*P/(2χ),-log(1-Q)] for P in Ps, Q in Qs], [w1*w2 for w1 in wPs, w2 in wQs]
+    [[√(1-Q^2)*P/(2χ),-log(1-Q)] for P in Ps, Q in Qs] |> vec |> stack, [w1*w2 for w1 in wPs, w2 in wQs] |> vec
 end
 
 Z(θ,χ) = dawson(√(θ/4χ))/√θ
@@ -40,10 +39,29 @@ N = 32
 scatter_θs = LinRange(θ_min,θ_max,N)
 line_θs = LinRange(θ_min,θ_max,4N)
 
+Xs,ws = getNodesAndWeights(χ)
 Us_ex = exact_energy(line_θs,χ,Es)
-Us_sc = solve_equations(scatter_θs,χ,f!,getNodesAndWeights,H,output_func=energy_output,reduction=energy_reduction,callback=disc_caustic_callback)
+Us_sc = energy_quadrature(scatter_θs, χ, f!, H, Xs, ws)
 Us_c = classical_energy.(line_θs,χ)
 #jldsave("Results/Morse/energy_χ=$χ.jld2";scatter_θs,line_θs,χ,Us_ex,Us_sc,Us_c)
+
+
+with_theme(theme) do
+    f = Figure(;fonts = (; regular = texfont()))
+    ax = Axis(f[1, 1],
+    xlabel=L"\theta",xticks=0:5,
+    ylabel = L"E")
+
+    lines!(line_θs, Us_ex, color=colors[1],label="Quantum")
+    scatter!(scatter_θs, first.(Us_sc), color=colors[2],label="Semiclassical",marker=:diamond)
+    lines!(line_θs, Us_c, color=colors[3],label="Classical",linestyle=:dash)
+
+    text!(ax, .42, .84, text=L"\chi = %$(try_conversion(χ))", space = :relative, fontsize=36)
+
+    axislegend(; merge=true, position=:rt)
+    f
+    #save("Plots/Nelson/energy_μ=$μ.svg",f)
+end
 ##
 χ = .12
 θ_min = .01
