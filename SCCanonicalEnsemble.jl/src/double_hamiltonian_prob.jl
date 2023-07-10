@@ -56,6 +56,7 @@ function integrand(Xs, θ, par, f!, H, output_func; dif_eq_alg=nothing, kwargs..
     prob_func(prob, i, repeat) = remake(prob, u0=u0(view(Xs, :, i)))
 
     H2 = squared_hamiltonian_symbol(H, N ÷ 2)
+    #H2 = (X,par) -> H(X,par)^2
 
     ensemble_prob = EnsembleProblem(prob; prob_func, output_func=(sol, i) -> output_func(sol, i, Xs, θ, par, H, H2))
 
