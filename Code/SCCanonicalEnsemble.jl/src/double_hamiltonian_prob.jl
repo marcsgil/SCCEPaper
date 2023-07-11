@@ -24,7 +24,10 @@ function annul!(integrator)
 end
 
 caustic_cross_contidion(u, t, integrator) = extract_det_jac(u) < 0 && extract_det_jac(integrator.uprev) > 0
+area_condition(u,t,integrator) = u[end] > 0 && integrator.uprev[end] < 0
 caustic_callback = DiscreteCallback(caustic_cross_contidion, annul!, save_positions=(false, false))
+area_callback = DiscreteCallback(area_condition,annul!,save_positions=(false,false))
+strong_callback = CallbackSet(caustic_callback,area_callback)
 
 function F!(du, u, par, f!, J, N)
     #This function defines the differential equation that needs to be solved
@@ -56,7 +59,6 @@ function integrand(Xs, θ, par, f!, H, output_func; dif_eq_alg=nothing, kwargs..
     prob_func(prob, i, repeat) = remake(prob, u0=u0(view(Xs, :, i)))
 
     H2 = squared_hamiltonian_symbol(H, N ÷ 2)
-    #H2 = (X,par) -> H(X,par)^2
 
     ensemble_prob = EnsembleProblem(prob; prob_func, output_func=(sol, i) -> output_func(sol, i, Xs, θ, par, H, H2))
 

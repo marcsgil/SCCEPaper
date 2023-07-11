@@ -1,4 +1,4 @@
-using SCCanonicalEnsemble
+using SCCanonicalEnsemble,QuantumCanonicalEnsemble
 using SolveSchrodinger
 using ProgressMeter
 
@@ -19,41 +19,9 @@ end=#
 χ = 1.
 xs = LinRange(-10,10,2048)
 Es,ψs = solveSchrodinger(xs,V;par=χ)
-ex_U(θ,Es) = sum(E->E*exp(-θ*E),Es)/sum(E->exp(-θ*E),Es)
 
-θ = 3.
-ex_U(θ,Es)
+θ = 4.
+quantum_heat(θ,Es)
 
-energyCubature(θ,χ,f!,H,2)
-energyMonteCarlo(θ,χ,H,1,f!,10^5,callback=strong_callback)
-##
-N = 128
-ps = LinRange(-12,12,N)
-qs = LinRange(-6,6,N)
-xs = [[p,q] for p in ps, q in qs]
-
-θs = LinRange(0,3,64)
-χ= .5
-
-custom_condition(u,t,integrator) = u[end]-1
-custom_callback = ContinuousCallback(custom_condition,annul!,save_positions=(false,false))
-
-sols = solve_equations(θs,χ,f!,(par)->(xs,nothing),H,
-abstol=1e-12,reltol=1e-12,alg=Vern8(),output_func=analysis_output,callback=CallbackSet(custom_callback,disc_caustic_callback))
-analysis_plot(sols,ps,qs,θs,χ)
-ma
-##
-χ = .5
-θ_min = .2
-θ_max = 3
-N = 16
-θs_sc = LinRange(θ_min,θ_max,N)
-θs_ex = LinRange(θ_min,θ_max,4N)
-
-xs = LinRange(-10,10,2048)
-Es,ψs = solveSchrodinger(xs,V;par=χ)
-
-Us_ex = [ex_U(θ,Es) for θ in θs_ex]
-Us_sc = @showprogress [energyMonteCarlo(θ,χ,H,1,f!,10^6,callback=CallbackSet(custom_callback,disc_caustic_callback)) for θ in θs_sc]
-
-comparison_plot(θs_ex,θs_sc,Us_ex,Us_sc,L"\chi = %$χ")
+heat_integrals(θ, χ, f!, H, [-10.,-10.], [10.,10.])
+heat_mc(θ, χ, f!, H, 1,maxiters=10^7,batchsize=2^15)

@@ -1,0 +1,7 @@
+name = "QuantumCanonicalEnsemble"
+uuid = "5d86a58f-6742-4e76-8226-ee7cfb98774e"
+authors = ["Marcos Gil <marcosgildeoliveira@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+OnlineStats = "a15396b6-48d5-5d58-9928-6d29437db91e"
