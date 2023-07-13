@@ -13,5 +13,8 @@ end
 
 coth(θ/2)/2
 
-energyMonteCarlo(θ,0,H,1,f!,10^6,callback=nothing)
+energy_integrals(θ, 0, f!, H, [-10.,-10.], [10.,10.])
 ##
+ub = ones(2) * 5
+lb = - ub
+energy_integrals2(θ, 0, f!, H, ub,lb)

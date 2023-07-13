@@ -11,7 +11,7 @@ theme = Theme(
     xtickalign=1, ytickalign=1,
     yticksize=12, xticksize=12),
     Lines = (linewidth = 5,),
-    Scatter = (markersize=20,),
+    Scatter = (markersize=20,marker=:diamond),
     Legend = (labelsize=28,)
 )
 

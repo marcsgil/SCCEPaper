@@ -17,7 +17,17 @@ N = 16
 scatter_θs = LinRange(θ_min,θ_max,N)
 line_θs = LinRange(θ_min,θ_max,4N)
 Us_sc = Vector{eltype(scatter_θs)}(undef, length(scatter_θs))
-
+##
+θ = 1. 
+ub = [30 * exp(-θ) for _ ∈ 1:4]
+lb = -ub
+quantum_energy(θ, Es)
+energy_integrals(θ, μ, f!, H, lb, ub, reltol=1e-2,abstol=1e-3,maxiters=10^5)
+##
+ub = [5,5,5,5]
+lb = [-5,-5,-5,-1]
+energy_integrals2(θ, μ, f!, H, lb,ub, reltol=1e-2,abstol=1e-3,maxiters=10^5)
+##
 @showprogress for (n, θ) ∈ enumerate(scatter_θs)
     lb = [30 * exp(-θ) for _ ∈ 1:4]
     ub = -lb
@@ -49,17 +59,24 @@ end
 θ_max = 2
 N = 16
 scatter_θs = LinRange(θ_min,θ_max,N)
-line_θs = LinRange(θ_min,θ_max,4N)
+line_θs = LinRange(.001,θ_max,4N)
 Cs_sc = Vector{eltype(scatter_θs)}(undef, length(scatter_θs))
 
-H([-10 for _ ∈ 1:4],μ) * exp(-θ_min * H([-10 for _ ∈ 1:4],μ))
-
-heat_integrals(θ_min, μ, f!, H, [-300 * exp(-θ_min) for _ ∈ 1:4], [300 * exp(-θ_min) for _ ∈ 1:4], reltol=1e-4,abstol=1e-4,maxiters=10^5, callback=caustic_callback)
-
+##
+θ = scatter_θs[1]
+ub = [12,12,60,12]
+lb = [-12,-12,-10,-12]
+heat_integrals(θ, μ, f!, H, ub, lb, reltol=1e-3,abstol=1e-3,maxiters=10^5)
+##
+data = heat_integrals(θ, μ, f!, H, ub, lb, reltol=1e-2,abstol=1e-3,maxiters=10^5)
+f,ax,hm = heatmap(view(reshape(data,3,128,128),3,:,:))
+Colorbar(f[1, 2], hm)
+f
+##
 @showprogress for (n, θ) ∈ enumerate(scatter_θs)
-    lb = [40 * exp(-θ) for _ ∈ 1:4]
-    ub = -lb
-    Cs_sc[n] = heat_integrals(θ, μ, f!, H, ub, lb, reltol=1e-4,abstol=1e-4,maxiters=10^6)
+    ub = [80 for _ ∈ 1:4] * exp(-θ)
+    lb = -ub
+    Cs_sc[n] = heat_integrals(θ, μ, f!, H, ub, lb, reltol=1e-2,abstol=1e-3,maxiters=10^5)
 end
 
 Cs_qu = quantum_heat(line_θs, Es)

@@ -60,21 +60,21 @@ with_theme(theme) do
     axislegend(; merge=true, position=:rt)
     f
     #save("Plots/Morse/energy_χ=$χ.svg",f)
-    #jldsave("Results/Morse/energy_χ=$χ.jld2";scatter_θs,line_θs,χ,Us_qu,Us_sc,Us_c)
+    jldsave("Results/Morse/energy_χ=$χ.jld2";scatter_θs,line_θs,χ,Us_qu,Us_sc,Us_c)
 end
 ##
 for χ ∈ (.01,.04,.08,.12)
-    θ_min = .01
-    θ_max = 5
+    θ_min = .2
+    θ_max = 7
     N = 16
     scatter_θs = LinRange(θ_min,θ_max,N)
     line_θs = LinRange(θ_min,θ_max,8N)
     
     Xs,ws = getNodesAndWeights(χ)
-    Cs_qu = quantum_heat(line_θs,χ,Es)
-    Cs_sc = heat_quadrature(scatter_θs, χ, f!, H, Xs, ws)
-    Cs_c = classical_heat.(line_θs,χ)
-    jldsave("Results/Morse/heat_χ=$χ.jld2";scatter_θs,line_θs,χ,Us_qu,Us_sc,Us_c)
+    quantum = quantum_energy(line_θs,χ,Es)
+    sc = energy_quadrature(scatter_θs, χ, f!, H, Xs, ws)
+    classical = classical_energy.(line_θs,χ)
+    jldsave("Results/Morse/energy_χ=$χ.jld2";scatter_θs,line_θs,χ,quantum,sc,classical)
 end
 
 with_theme(theme) do

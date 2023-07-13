@@ -31,7 +31,7 @@ function energy_mc(θ, par, f!, H, d;
 
         val, σ2 = value.(s.stats)
         if abs(σ2 / val) < reltol || √σ2 < abstol
-            break
+            #break
         end
     end
 

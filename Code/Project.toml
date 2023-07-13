@@ -2,6 +2,7 @@
 CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 ClassicalCanonicalEnsemble = "83f161c2-7e43-4047-8c75-adc71487701c"
 ColorSchemes = "35d6a980-a343-548e-a6ea-1d62b119f2f4"
+DynamicalSystems = "61744808-ddfa-5f27-97ff-6e42cc95d634"
 FastGaussQuadrature = "442a2c76-b920-505d-bb47-c5924d526838"
 ForwardDiff = "f6369f11-7733-5829-9624-2563aa707210"
 JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"

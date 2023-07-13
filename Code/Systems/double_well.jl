@@ -20,8 +20,11 @@ end=#
 xs = LinRange(-10,10,2048)
 Es,ψs = solveSchrodinger(xs,V;par=χ)
 
-θ = 4.
-quantum_heat(θ,Es)
+θ = 1.
+quantum_energy(θ,Es)
 
-heat_integrals(θ, χ, f!, H, [-10.,-10.], [10.,10.])
-heat_mc(θ, χ, f!, H, 1,maxiters=10^7,batchsize=2^15)
+energy_integrals(θ, χ, f!, H, [-10.,-10.], [10.,10.])
+##
+ub = ones(2) * 10
+lb = -ub
+energy_integrals2(θ, χ, f!, H, ub,lb)

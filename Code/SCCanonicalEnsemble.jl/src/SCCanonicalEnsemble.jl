@@ -3,7 +3,7 @@ module SCCanonicalEnsemble
 using Reexport
 
 @reexport using DifferentialEquations
-using SparseDiffTools,LinearAlgebra,Integrals,IntegralsCubature,ProgressMeter
+using SparseDiffTools,LinearAlgebra,Integrals,IntegralsCubature,ProgressMeter,Tullio
 
 #=include("sc_functions.jl")
 export energy_output,energy_outputMonteCarlo,energy_reduction,analysis_output,
@@ -14,7 +14,7 @@ include("double_hamiltonian_prob.jl")
 regularize(x) = isfinite(sum(x)) ? x : zero(x)
 
 include("integrals.jl")
-export energy_integrals, heat_integrals
+export energy_integrals, heat_integrals, energy_integrals2
 
 include("quadrature.jl")
 export energy_quadrature, heat_quadrature, caustic_callback, strong_callback
