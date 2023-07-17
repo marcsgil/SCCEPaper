@@ -11,7 +11,7 @@ function energy_output_integrals(sol, i, Xs, θ, par, H, H2)
     regularize(output), false
 end
 
-function energy_integrals(θ, par, f!, H, ub, lb; 
+function energy_integrals(θ, par, f!, H, lb, ub; 
     reltol=1e-2, abstol=1e-3, dif_eq_alg=nothing, int_alg=CubatureJLh(), 
     maxiters = 10^6, callback = caustic_callback)
     function formated_integrand(Xs, _)
@@ -26,7 +26,7 @@ function energy_integrals(θ, par, f!, H, ub, lb;
     U[2] / U[1]
 end
 
-function energy_integrals2(θ, par, f!, H, ub, lb; 
+function energy_integrals2(θ, par, f!, H, lb, ub; 
     reltol=1e-2, abstol=1e-3, dif_eq_alg=nothing, int_alg=CubatureJLh(), 
     maxiters = 10^6, callback = caustic_callback)
 
@@ -59,13 +59,13 @@ function heat_output_integrals(sol, i, Xs, θ, par, H, H2)
     regularize(output), false
 end
 
-function heat_integrals(θ, par, f!, H, ub, lb;  
+function heat_integrals(θ, par, f!, H, lb, ub;  
     reltol=1e-2, abstol=1e-3, dif_eq_alg=nothing, int_alg=CubatureJLh(), 
     maxiters = 10^6, callback = caustic_callback)
     formated_integrand(Xs, _) = integrand(Xs, θ, par, f!, H, heat_output_integrals;
         dif_eq_alg, reltol, abstol, save_start=false, save_everystep=false, verbose=false, callback)
 
-    #pxs = [[.01,.01,x,y] for y ∈ LinRange(-10,60,128), x ∈ LinRange(-12,12,128)] |> vec |> stack
+    #pxs = [[0.1,0.1,x,y] for y ∈ LinRange(lb[4],ub[4],128), x ∈ LinRange(lb[3],ub[3],128)] |> vec |> stack
     #formated_integrand(pxs,nothing)
     prob = IntegralProblem(formated_integrand, lb, ub; nout=3, batch=Threads.nthreads())
 

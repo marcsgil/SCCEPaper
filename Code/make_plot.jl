@@ -1,11 +1,17 @@
 include("plot_config.jl")
+try_conversion(x) = isinteger(x) ? Int(x) : x
 using JLD2
 ##
 function make_plot_2by2(ylabel,pars,makepath, maketext, textpos)
     f = Figure(resolution=(1800, 1200), fontsize=48)
     positions = Iterators.product(1:2, 1:2) |> collect |> permutedims
     axs = [Axis(f[pos...];
-        xticks=0:7, ylabelsize=48, xlabelsize=48, xticklabelsize=40, yticklabelsize=40) for pos ∈ positions]
+        xticks=0:7, 
+        ylabelsize=48, 
+        xlabelsize=48, 
+        xticklabelsize=40, 
+        yticklabelsize=40,
+        yscale=log2,yticks =[2.0^n for n ∈ -1:4]) for pos ∈ positions]
 
     for n ∈ 1:4
         par = pars[n]
@@ -65,13 +71,13 @@ function make_plot_2by1(ylabel,pars,makepath, maketext, textpos)
     f,axs
 end
 
-ylabel = L"E/\hbar \omega"
-pars = (0.01,0.04,0.08,0.12)
-makepath(χ) = "Results/Morse/energy_χ=$χ.jld2"
-maketext(χ) = L"\chi = %$χ"
+ylabel = L"E"
+pars = (0.5,1.0,1.5,2.0)
+makepath(μ) = "Results/Nelson/energy_μ=$μ.jld2"
+maketext(μ) = L"\mu = %$(try_conversion(μ))"
 
-f,axs = make_plot(ylabel,pars,makepath, maketext, (0.75,0.6))
-ylims!(axs[1],0,2.2)
-ylims!(axs[2],0,2.2)
+f,axs = make_plot_2by2(ylabel,pars,makepath, maketext, (0.75,0.6))
+#ylims!(axs[1],0,2.2)
+#ylims!(axs[2],0,2.2)
 f
-#save("Plots/Morse/energy_morse.pdf",f)
+#save("Plots/Morse/energy_nelson.pdf",f)
