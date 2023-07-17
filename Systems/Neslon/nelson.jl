@@ -49,8 +49,7 @@ end
 ##
 
 ##
-μ = 2
-for μ ∈ (1,2)
+for μ ∈ 0.5
     θ_min = .1
     θ_max = 4
     N = 16
@@ -65,7 +64,7 @@ for μ ∈ (1,2)
     Us_sc = @showprogress [online_eval_energy(θ,μ,0,60,4*10^5) for θ in scatter_θs]
     Us_c = classical_energy(line_θs,2,μ,potential=V,reltol=1e-3)
 
-    jldsave("Results/Nelson/energy_μ=$μ.jld2";scatter_θs,line_θs,μ,Us_ex,Us_sc,Us_c)
+    #jldsave("Results/Nelson/energy_μ=$μ.jld2";scatter_θs,line_θs,μ,Us_ex,Us_sc,Us_c)
 end
 ##
 using Plots,LaTeXStrings
