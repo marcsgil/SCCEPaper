@@ -10,6 +10,7 @@ export energy_output,energy_outputMonteCarlo,energy_reduction,analysis_output,
 caustic_callback,energyMonteCarlo,heat_reduction,heat_output,heatMonteCarlo=#
 
 include("double_hamiltonian_prob.jl")
+export integrand
 
 regularize(x) = isfinite(sum(x)) ? x : zero(x)
 

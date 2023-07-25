@@ -11,7 +11,7 @@ function get_converted_monomials(N)
 end
 
 function normalize_and_change_basis(p::Polynomial)
-    #Given a basis 1,…,xⁿ and a polynomial p(x) = ∑ cₙ xⁿ, returns returns p/(2^degrre(p)) with respect to the basis 1,…,uⁿ, where u = x/2
+    #Given a basis 1,…,xⁿ and a polynomial p(x) = ∑ cₙ xⁿ, returns returns p/(2^degree(p)) with respect to the basis 1,…,uⁿ, where u = x/2
 
     #This is useful because it is straightforward to obtain the Wigner representation of (̂p²+̂q²)ⁿ, which is done by get_converted_monomials.
     #On the other hand, to perform other calculations, it is easier to express normal forms as powers of [(̂p²+̂q²)/2]ⁿ or [(p²+q²)/2]ⁿ
