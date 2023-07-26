@@ -17,11 +17,9 @@ regularize(x) = isfinite(sum(x)) ? x : zero(x)
 include("integrals.jl")
 export energy_integrals, heat_integrals, energy_integrals2
 
-include("projections.jl")
-export wigner_output
 
 include("quadrature.jl")
-export energy_quadrature, heat_quadrature, caustic_callback, strong_callback
+export energy_quadrature, heat_quadrature, caustic_callback, strong_callback, partition_quadrature, partition_output_quadrature
 
 using OnlineStats, AdvancedMH, Distributions, MCMCChains, Statistics
 include("monte_carlo.jl")
