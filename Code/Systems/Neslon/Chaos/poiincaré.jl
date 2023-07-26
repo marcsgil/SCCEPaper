@@ -17,12 +17,12 @@ prob = ODEProblem(nelson,x,(0,1000.),2.0)
 system = ContinuousDynamicalSystem(prob)
 ds = CoupledODEs(system, diffeq)
 ##
-u0s = [ @SVector randn(4) for _ ∈ 1:3 ]
+u0s = [ SVector(p,1,0,0) for p ∈ LinRange(1,15,3) ]
 # inputs
 trs = [trajectory(ds, 10^5, u0)[1][:, SVector(1,2,3)] for u0 ∈ u0s]
 j = 2 # the dimension of the plane
 
-figure, ax3D, ax2D = interactive_poincaresos_scan(trs, j; linekw = (transparency = true,))
+figure, ax3D, ax2D = interactive_poincaresos_scan(trs, j; linekw = (transparency = true,), scatterkw = (alpha=0.5,markersize=4,), colors=[:red,:green,:blue])
 
 figure
 ##
