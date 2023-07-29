@@ -37,16 +37,24 @@ Us_sc = sc_energy(line_θs,χ)
 cs_sc = sc_heat(line_θs,χ)
 
 U2_sc = @. cs_sc / ( cs_sc + scatter_θs^2 * Us_sc^2)
+
 Us_q = quantum_energy(line_θs,χ,Es)
 cs_q = quantum_heat(line_θs,χ,Es)
 
 U2_q = @. cs_q / ( cs_q + scatter_θs^2 * Us_q^2 )
 
+Us_c = classical_energy(line_θs,1,χ,hamiltonian=H)
+cs_c = classical_heat(line_θs,1,χ,hamiltonian=H)
+
+U2_c = @. cs_c / ( cs_c + scatter_θs^2 * Us_c^2 )
+##
 fig = Figure()
-ax = Axis(fig[1,1])
+ax = Axis(fig[1,1], xticks = 0:2:10)
 lines!(ax,scatter_θs,U2_q, label = "Quantum")
-lines!(ax,scatter_θs,U2_sc, label = "SC")
+lines!(ax,scatter_θs,U2_sc, label = "SC", linestyle = :dot, linewidth=8)
+lines!(ax,scatter_θs,U2_c, label = "SC", linestyle = :dash)
 fig
 ax.xlabel = L"\theta"
-ax.ylabel = L"(<U^2> - <U>^2) / <U^2>"
+ax.ylabel = L"\left(\left \langle U^2\right \rangle  - \left \langle U\right \rangle ^2\right) / \left \langle U^2\right \rangle "
 fig
+save("Plots/Kerr/heat_analysis.pdf",fig)
