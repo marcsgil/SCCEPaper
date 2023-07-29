@@ -55,6 +55,6 @@ lines!(ax,scatter_θs,U2_sc, label = "SC", linestyle = :dot, linewidth=8)
 lines!(ax,scatter_θs,U2_c, label = "SC", linestyle = :dash)
 fig
 ax.xlabel = L"\theta"
-ax.ylabel = L"\left(\left \langle U^2\right \rangle  - \left \langle U\right \rangle ^2\right) / \left \langle U^2\right \rangle "
+ax.ylabel = L"\left(\left \langle \hat{H}^2\right \rangle  - \left \langle \hat{H}\right \rangle ^2\right) / \left \langle \hat{H}^2\right \rangle "
 fig
-save("Plots/Kerr/heat_analysis.pdf",fig)
+#save("Plots/Kerr/heat_analysis_kerr.pdf",fig)
